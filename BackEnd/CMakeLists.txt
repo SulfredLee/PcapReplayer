@@ -1,5 +1,12 @@
+# Handle linux libraries
+if (UNIX)
+  find_package(
+    Threads) # include this package to fix problem 001
+else ()
+endif ()
+
 # Handle boost libraries
-find_package (Boost REQUIRED
+find_package(Boost REQUIRED
 	log
 	system
 	filesystem
@@ -7,8 +14,7 @@ find_package (Boost REQUIRED
 	log_setup
 	chrono
 	regex
-  thread
-)
+  thread)
 
 message(STATUS "Backend - Boost library status:")
 message(STATUS "Backend -     version: ${BoosT_VERSION}")
@@ -42,19 +48,20 @@ add_executable(PcapReplayer ${BackEnd_src})
 add_dependencies(PcapReplayer FrontEnd Utils)
 
 if (UNIX)
-  file(GLOB FrontEnd_lib
-    ${PROJECT_BINARY_DIR}/FrontEnd/*.a
-    ${PROJECT_BINARY_DIR}/Utils/*.a)
+  file(GLOB BackEnd_lib
+    ${PROJECT_BINARY_DIR}/FrontEnd/libFrontEnd.a
+    ${PROJECT_BINARY_DIR}/Utils/libUtils.a)
   target_link_libraries(PcapReplayer
-    debug ${FrontEnd_lib}
-    optimized ${FrontEnd_lib})
+    debug ${BackEnd_lib}
+    optimized ${BackEnd_lib}
+    ${CMAKE_THREAD_LIBS_INIT}) # include this package to fix problem 001
 else ()
-  file(GLOB FrontEnd_lib
-    ${PROJECT_BINARY_DIR}/FrontEnd/*.lib
-    ${PROJECT_BINARY_DIR}/Utils/*.lib)
+  file(GLOB BackEnd_lib
+    ${PROJECT_BINARY_DIR}/FrontEnd/libFrontEnd.lib
+    ${PROJECT_BINARY_DIR}/Utils/libUtils.lib)
   target_link_libraries(PcapReplayer
-    debug ${FrontEnd_lib}
-    optimized ${FrontEnd_lib})
+    debug ${BackEnd_lib}
+    optimized ${BackEnd_lib})
 endif()
 target_link_libraries(PcapReplayer
   Qt5::Widgets
@@ -69,3 +76,6 @@ install (TARGETS PcapReplayer
   RUNTIME DESTINATION ${PROJECT_BINARY_DIR}/bin
   LIBRARY DESTINATION ${PROJECT_BINARY_DIR}/bin
   ARCHIVE DESTINATION ${PROJECT_BINARY_DIR}/bin)
+
+# Problem 001
+#        /usr/bin/ld: ... undefined reference to symbol 'pthread_rwlock_wrlock@@GLIBC_2.2.5'
