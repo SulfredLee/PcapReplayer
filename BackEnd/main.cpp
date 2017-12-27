@@ -12,6 +12,8 @@ int main(int argc, char* argv[]){
     Logging::CLogTargetDebugger traceLogger(Logging::LOG_LEVEL_TRACE);
     Logging::CLoggerFactory::getDefaultInstance()->AddTarget(&traceLogger);
 
+    LOGMSG_INFO("IN");
+
     MainWindowComponent compo;
     Config config;
     MainWindow MW;
@@ -21,5 +23,6 @@ int main(int argc, char* argv[]){
 
     bool bRTN = app.exec();
 
+    LOGMSG_INFO("OUT");
     return bRTN;
 }
