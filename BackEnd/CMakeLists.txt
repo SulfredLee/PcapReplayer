@@ -5,6 +5,8 @@ if (UNIX)
 else ()
 endif ()
 
+message(STATUS "BackEnd - CMAKE_THREAD_LIBS_INIT: ${CMAKE_THREAD_LIBS_INIT}")
+
 # Handle boost libraries
 find_package(Boost REQUIRED
 	log
@@ -27,8 +29,8 @@ find_package(Qt5 REQUIRED
 	Gui
 	Widgets)
 message(STATUS "BackEnd - QT library status:")
-message(STATUS "BackEnd -     version: ${QT_VERSION}")
-message(STATUS "BackEnd -     libraries: ${QT_LIBRARIES}")
+message(STATUS "BackEnd -     version: ${Qt5Widgets_VERSION}")
+message(STATUS "BackEnd -     libraries: ${Qt5Widgets_LIBRARIES}")
 message(STATUS "BackEnd -     include path: ${QT_INCLUDE_DIR}")
 
 file(GLOB BackEnd_src
@@ -64,7 +66,7 @@ else ()
     optimized ${BackEnd_lib})
 endif()
 target_link_libraries(PcapReplayer
-  Qt5::Widgets
+  ${Qt5Widgets_LIBRARIES}
   ${Boost_LIBRARIES})
 
 # Creates a folder "executables" and adds target

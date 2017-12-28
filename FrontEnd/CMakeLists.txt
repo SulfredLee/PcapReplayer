@@ -2,8 +2,8 @@
 find_package(Qt5 REQUIRED
   Widgets)
 message(STATUS "FrontEnd - QT library status:")
-message(STATUS "FrontEnd -     version: ${QT_VERSION}")
-message(STATUS "FrontEnd -     libraries: ${QT_LIBRARIES}")
+message(STATUS "FrontEnd -     version: ${Qt5Widgets_VERSION}")
+message(STATUS "FrontEnd -     libraries: ${Qt5Widgets_LIBRARIES}")
 message(STATUS "FrontEnd -     include path: ${QT_INCLUDE_DIR}")
 
 set(FrontEndPath ${PROJECT_SOURCE_DIR}/FrontEnd)
@@ -36,7 +36,9 @@ add_library(FrontEnd
   ${FrontEnd_ui_moc}
   ${FrontEnd_rcc_moc}
   ${PlayerEngine_src})
-target_link_libraries(FrontEnd Qt5::Widgets Utils)
+target_link_libraries(FrontEnd
+  ${Qt5Widgets_LIBRARIES}
+  Utils)
 
 # Creates a folder "libraries" and adds target project (*.vcproj) under it
 set_property(TARGET FrontEnd PROPERTY FOLDER "libraries")
