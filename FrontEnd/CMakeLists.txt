@@ -26,8 +26,10 @@ file(GLOB PlayerEngine_src
 include_directories(${QT_INCLUDE_DIR}
   ${PROJECT_SOURCE_DIR}/FrontEnd
   ${PROJECT_SOURCE_DIR}/BackEnd/PlayerEngine
+  ${PROJECT_SOURCE_DIR}/Utils
   ${PROJECT_BINARY_DIR}/FrontEnd
-  ${QT_INCLUDE_DIR}/QtWidgets)
+  ${QT_INCLUDE_DIR}/QtWidgets
+  ${Boost_INCLUDE_DIR})
 
 add_library(FrontEnd
   ${FrontEnd_src}
@@ -36,6 +38,7 @@ add_library(FrontEnd
   ${FrontEnd_ui_moc}
   ${FrontEnd_rcc_moc}
   ${PlayerEngine_src})
+
 target_link_libraries(FrontEnd
   ${Qt5Widgets_LIBRARIES}
   Utils)

@@ -30,7 +30,7 @@ find_package(Qt5 REQUIRED
 	Widgets)
 message(STATUS "BackEnd - QT library status:")
 message(STATUS "BackEnd -     version: ${Qt5Widgets_VERSION}")
-message(STATUS "BackEnd -     libraries: ${Qt5Widgets_LIBRARIES}")
+message(STATUS "BackEnd -     libraries: ${Qt5Widgets_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5Core_QTMAIN_LIBRARIES} ${Qt5Gui_LIBRARIES}")
 message(STATUS "BackEnd -     include path: ${QT_INCLUDE_DIR}")
 
 file(GLOB BackEnd_src
@@ -66,6 +66,9 @@ else ()
     optimized ${BackEnd_lib})
 endif()
 target_link_libraries(PcapReplayer
+  ${Qt5Core_LIBRARIES}
+  ${Qt5Core_QTMAIN_LIBRARIES}
+  ${Qt5Gui_LIBRARIES}
   ${Qt5Widgets_LIBRARIES}
   ${Boost_LIBRARIES})
 

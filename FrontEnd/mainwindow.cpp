@@ -2,11 +2,15 @@
 #include "ui_mainwindow.h"
 
 #include "Config.h"
+#include "LogMgr.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow){
     ui->setupUi(this);
+
+    LOGMSG_INFO("IN");
+
     // handle Menu action
     connect(ui->actionOpen_File_Menu, SIGNAL(triggered()), this, SLOT(onOpen_File()));
     connect(ui->actionOpen_Folder_Menu, SIGNAL(triggered()), this, SLOT(onOpen_Folder()));
@@ -35,17 +39,24 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // handle UI status
     SwitchUIStatus_Init();
+
+    LOGMSG_INFO("OUT");
 }
 
 MainWindow::~MainWindow(){
+    LOGMSG_INFO("IN");
+    LOGMSG_INFO("OUT");
     delete ui;
 }
 
 void MainWindow::InitComponent(const MainWindowComponent& InCompo){
+    LOGMSG_INFO("IN");
     m_Compo = InCompo;
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::SwitchUIStatus_Init(){
+    LOGMSG_INFO("IN");
     // handle Menu Action
     ui->actionOpen_File_Menu->setEnabled(true);
     ui->actionOpen_Folder_Menu->setEnabled(true);
@@ -84,9 +95,11 @@ void MainWindow::SwitchUIStatus_Init(){
     ui->progressBar->setValue(0);
     // handle Label
     ui->LabelSchedulerStatus->setText("");
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::SwitchUIStatus_Play(){
+    LOGMSG_INFO("IN");
     // handle Menu Action
     ui->actionOpen_File_Menu->setEnabled(false);
     ui->actionOpen_Folder_Menu->setEnabled(false);
@@ -123,23 +136,30 @@ void MainWindow::SwitchUIStatus_Play(){
     ui->tableWidget_NetMapSrc->setEnabled(false);
     // handle Progress Bar
     ui->progressBar->setValue(0);
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::SwitchUIStatus_Pause(){
+    LOGMSG_INFO("IN");
     SwitchUIStatus_Play();
     // handle Difference
     ui->BtnPlay->setEnabled(true);
     ui->BtnPause->setEnabled(false);
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::SwitchUIStatus_Stop(){
+    LOGMSG_INFO("IN");
     SwitchUIStatus_Init();
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::AddPcapFilesToUI(const QStringList& INFiles){
+    LOGMSG_INFO("IN");
     // handle UI
     // ui->listWidget_FileList->clear();
     if (INFiles.isEmpty()){
+        LOGMSG_INFO("OUT");
         return;
     }
 
@@ -156,9 +176,12 @@ void MainWindow::AddPcapFilesToUI(const QStringList& INFiles){
         }
     }
     ui->listWidget_FileList->setCurrentRow(0);
+    LOGMSG_INFO("OUT");
 }
 
 std::string MainWindow::ConvertQString2String(const QString& qstr){
+    LOGMSG_INFO("IN");
+    LOGMSG_INFO("OUT");
     // for unix
     return qstr.toUtf8().constData();
     // for windows
@@ -166,31 +189,40 @@ std::string MainWindow::ConvertQString2String(const QString& qstr){
 }
 
 QString MainWindow::ConvertString2QString(const std::string& str){
+    LOGMSG_INFO("IN");
+    LOGMSG_INFO("OUT");
     return QString::fromStdString(str);
 }
 
 std::vector<std::string> MainWindow::ConvertQStringList(const QStringList& qstrList){
+    LOGMSG_INFO("IN");
     std::vector<std::string> result;
     for (qint32 i = 0; i < qstrList.length(); i++){
         result.push_back(ConvertQString2String(qstrList[i]));
     }
+    LOGMSG_INFO("OUT");
     return result;
 }
 
 QStringList MainWindow::ConvertVectorString(const std::vector<std::string>& vecStr){
+    LOGMSG_INFO("IN");
     QStringList result;
     for (size_t i = 0; i < vecStr.size(); i++){
         result += ConvertString2QString(vecStr[i]);
     }
+    LOGMSG_INFO("OUT");
     return result;
 }
 
 bool MainWindow::IsFileExists(const QString& qstrPath){
+    LOGMSG_INFO("IN");
     QFileInfo check_file(qstrPath);
+    LOGMSG_INFO("OUT");
     return (check_file.exists() && check_file.isFile());
 }
 
 void MainWindow::onOpen_File(){
+    LOGMSG_INFO("IN");
     QStringList fileNames; // fileNames contains full path with file name
     if (m_Compo.pConfig->GetLatestFilePath() == "")
         fileNames = QFileDialog::getOpenFileNames(this,
@@ -203,14 +235,18 @@ void MainWindow::onOpen_File(){
                                                   ConvertString2QString(m_Compo.pConfig->GetLatestFilePath()),
                                                   tr("Pcap Files (*.pcap)"));
 
-    if (fileNames.length() == 0)
+    if (fileNames.length() == 0){
+        LOGMSG_INFO("OUT");
         return;
+    }
     AddPcapFilesToUI(fileNames);
 
     m_Compo.pConfig->AddPcapFiles(ConvertQStringList(fileNames));
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onOpen_Folder(){
+    LOGMSG_INFO("IN");
     QString strFilePath;
     if (m_Compo.pConfig->GetLatestFilePath() == "")
         strFilePath = QFileDialog::getExistingDirectory(this,
@@ -223,8 +259,10 @@ void MainWindow::onOpen_Folder(){
                                                         ConvertString2QString(m_Compo.pConfig->GetLatestFilePath()),
                                                         QFileDialog::ShowDirsOnly);
 
-    if (strFilePath == "")
+    if (strFilePath == ""){
+        LOGMSG_INFO("OUT");
         return;
+    }
 
     //QDirIterator it(m_strLatestFilePath, QStringList() << "*.pcap", QDir::Files, QDirIterator::Subdirectories);
     QDirIterator it(strFilePath, QStringList() << "*.pcap", QDir::Files, QDirIterator::NoIteratorFlags);
@@ -238,42 +276,56 @@ void MainWindow::onOpen_Folder(){
 
     AddPcapFilesToUI(fileNames);
     m_Compo.pConfig->AddPcapFiles(ConvertQStringList(fileNames));
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onSave_Config(){
+    LOGMSG_INFO("IN");
     QMessageBox TestingBox;
     TestingBox.setWindowTitle(QString("Wait for input!"));
     TestingBox.show();
     TestingBox.exec();
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onLoad_Config(){
+    LOGMSG_INFO("IN");
     QMessageBox TestingBox;
     TestingBox.setWindowTitle(QString("Wait for input!"));
     TestingBox.show();
     TestingBox.exec();
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onScheduler(){
+    LOGMSG_INFO("IN");
     QMessageBox TestingBox;
     TestingBox.setWindowTitle(QString("Wait for input!"));
     TestingBox.show();
     TestingBox.exec();
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onPlay(){
+    LOGMSG_INFO("IN");
     SwitchUIStatus_Play();
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onPause(){
+    LOGMSG_INFO("IN");
     SwitchUIStatus_Pause();
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onStop(){
+    LOGMSG_INFO("IN");
     SwitchUIStatus_Stop();
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onRemove(){
+    LOGMSG_INFO("IN");
     int nCurIdx = ui->listWidget_FileList->currentRow();
     QListWidgetItem* pItem = ui->listWidget_FileList->takeItem(nCurIdx);
     delete pItem;
@@ -283,45 +335,58 @@ void MainWindow::onRemove(){
         ui->BtnRemoveAll->setEnabled(false);
     }
     m_Compo.pConfig->RemovePcapFile(nCurIdx);
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onRemoveAll(){
+    LOGMSG_INFO("IN");
     ui->listWidget_FileList->clear();
     // handle UI
     ui->BtnRemove->setEnabled(false);
     ui->BtnRemoveAll->setEnabled(false);
 
     m_Compo.pConfig->RemoveAllPcapFile();
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onRegularPaly(){
+    LOGMSG_INFO("IN");
     SwitchUIStatus_Play();
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onAddSrcMap(){
+    LOGMSG_INFO("IN");
     QMessageBox TestingBox;
     TestingBox.setWindowTitle(QString("Wait for input!"));
     TestingBox.show();
     TestingBox.exec();
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onAddDstMap(){
+    LOGMSG_INFO("IN");
     QMessageBox TestingBox;
     TestingBox.setWindowTitle(QString("Wait for input!"));
     TestingBox.show();
     TestingBox.exec();
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onRemoveScrMapIP(){
+    LOGMSG_INFO("IN");
     QMessageBox TestingBox;
     TestingBox.setWindowTitle(QString("Wait for input!"));
     TestingBox.show();
     TestingBox.exec();
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onRemoveDstMapIP(){
+    LOGMSG_INFO("IN");
     QMessageBox TestingBox;
     TestingBox.setWindowTitle(QString("Wait for input!"));
     TestingBox.show();
     TestingBox.exec();
+    LOGMSG_INFO("OUT");
 }
