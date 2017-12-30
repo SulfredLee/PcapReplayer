@@ -5,6 +5,7 @@
 #include "mainwindow.h"
 #include "Config.h"
 #include "LogMgr.h"
+#include "PlayerCtrl.h"
 
 int main(int argc, char* argv[]){
     QApplication app(argc, argv);
@@ -14,11 +15,19 @@ int main(int argc, char* argv[]){
 
     LOGMSG_INFO("IN");
 
-    MainWindowComponent compo;
     Config config;
+    // handle BackEnd
+    PlayerCtrlComponent PlayerCtrlCompo;
+    PlayerCtrl playerCtrl;
+    PlayerCtrlCompo.pConfig = &config;
+    playerCtrl.InitComponent(PlayerCtrlCompo);
+
+    // handle FrontEnd
+    MainWindowComponent MainWindowCompo;
     MainWindow MW;
-    compo.pConfig = &config;
-    MW.InitComponent(compo);
+    MainWindowCompo.pConfig = &config;
+    MainWindowCompo.pMsgQ = playerCtrl.GetMsgQ();
+    MW.InitComponent(MainWindowCompo);
     MW.show();
 
     bool bRTN = app.exec();

@@ -10,6 +10,9 @@
 #include <string>
 #include <vector>
 
+#include "MsgQ.h"
+#include "Common.h"
+
 class Config;
 
 namespace Ui {
@@ -18,6 +21,7 @@ class MainWindow;
 
 struct MainWindowComponent{
     Config* pConfig;
+    MsgQ<PlayerMsg>* pMsgQ;
 };
 
 class MainWindow : public QMainWindow

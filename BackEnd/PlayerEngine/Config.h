@@ -3,6 +3,9 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
+
+#include "Common.h"
 
 class Config{
 public:
@@ -14,9 +17,12 @@ public:
     void RemoveAllPcapFile();
 
     void SetLatestFilePath(const std::string& INStr);
+    void SetPlayerStatus(const PlayerStatus& INStatus);
     std::string GetLatestFilePath();
+    PlayerStatus GetPlayerStatus();
 private:
     std::vector<std::string> m_PcapFiles;
     std::string m_strLatestFilePath;
+    PlayerStatus m_PlayerStatus;
 };
 #endif

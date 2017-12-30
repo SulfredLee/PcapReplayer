@@ -8,7 +8,8 @@ include_directories(${PROJECT_SOURCE_DIR}/Utils
   ${Boost_INCLUDE_DIR})
 
 # state that this project is a library
-add_library(Utils ${Utils_src}) # static library
+add_library(Utils
+  ${Utils_src}) # static library
 # add_library(Utils SHARED ${Utils_src}) # dynamic library
 
 # Adds logic to INSTALL.vcproj to copy *.a to destination directory

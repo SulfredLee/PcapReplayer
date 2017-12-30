@@ -51,11 +51,11 @@ namespace Logging
     enum LOG_LEVEL
     {
         LOG_LEVEL_TRACE = 0,
-        LOG_LEVEL_DEBUG = 1,
-        LOG_LEVEL_INFO = 2,
-        LOG_LEVEL_WARN = 3,
-        LOG_LEVEL_ERROR = 4,
-        LOG_LEVEL_FATAL = 5
+        LOG_LEVEL_DEBUG = 2,
+        LOG_LEVEL_INFO = 3,
+        LOG_LEVEL_WARN = 4,
+        LOG_LEVEL_ERROR = 5,
+        LOG_LEVEL_FATAL = 6
     };
 
     class CLogMessage
@@ -149,59 +149,50 @@ namespace Logging
     //	virtual void Append(std::string szMsg) { ::AtlMessageBox(NULL, szMsg); }
     //};
 
-    class CLogger
-    {
+    class CLogger{
     private:
         int m_dwLogStart;
         std::vector<ILogTarget*> m_pTargets;
 
     public:
-        CLogger()
-            {
-                m_dwLogStart = getTickCount();
-                boostInit();
-            }
-        ~CLogger()
-            {
-                for (size_t i = 0; i<m_pTargets.size(); i++)
-                    delete m_pTargets[i];
-                m_pTargets.clear();
-            }
+        CLogger(){
+            m_dwLogStart = getTickCount();
+            boostInit();
+        }
+        ~CLogger(){
+            for (size_t i = 0; i<m_pTargets.size(); i++)
+                delete m_pTargets[i];
+            m_pTargets.clear();
+        }
 
-        void AddTarget(ILogTarget* pTarget)
-        {
+        void AddTarget(ILogTarget* pTarget){
             m_pTargets.push_back(pTarget);
         }
-        void Log(LOG_LEVEL lvl, std::string szMsg, std::string szFile, std::string szFunction, int nLine)
-        {
+        void Log(LOG_LEVEL lvl, std::string szMsg, std::string szFile, std::string szFunction, int nLine){
             bool shouldLog = false;
-            for (size_t i = 0; i<m_pTargets.size(); i++)
-                {
+            for (size_t i = 0; i<m_pTargets.size(); i++){
+                if (m_pTargets[i]->IsEnabled(lvl)){
+                    shouldLog = true;
+                    break; // for
+                }
+            }
+
+            if (shouldLog){
+                boost::filesystem::path p(szFile);
+                std::ostringstream msg;
+                //msg << std::setfill('0') << std::setw(6) << getTickCount() - m_dwLogStart << " ";
+                msg << "[" << szFunction << "] ";
+                msg << p.filename() << ":" << nLine << " - " << szMsg;
+                //std::string msg;
+                //msg.Format(_T("%06d [%s] %s:%d - %s"), getTickCount() - m_dwLogStart, szFunction, ::PathFindFileName(szFile), nLine, szMsg);
+
+                for (size_t i = 0; i<m_pTargets.size(); i++)
                     if (m_pTargets[i]->IsEnabled(lvl))
-                        {
-                            shouldLog = true;
-                            break; // for
-                        }
-                }
-
-            if (shouldLog)
-                {
-                    boost::filesystem::path p(szFile);
-                    std::ostringstream msg;
-                    //msg << std::setfill('0') << std::setw(6) << getTickCount() - m_dwLogStart << " ";
-                    msg << "[" << szFunction << "] ";
-                    msg << p.filename() << ":" << nLine << " - " << szMsg;
-                    //std::string msg;
-                    //msg.Format(_T("%06d [%s] %s:%d - %s"), getTickCount() - m_dwLogStart, szFunction, ::PathFindFileName(szFile), nLine, szMsg);
-
-                    for (size_t i = 0; i<m_pTargets.size(); i++)
-                        if (m_pTargets[i]->IsEnabled(lvl))
-                            m_pTargets[i]->Append(msg.str(), lvl);
-                }
+                        m_pTargets[i]->Append(msg.str(), lvl);
+            }
         }
     private:
-        unsigned getTickCount()
-        {
+        unsigned getTickCount(){
 #ifdef WINDOWS
             return GetTickCount();
 #else

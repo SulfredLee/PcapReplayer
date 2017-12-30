@@ -180,37 +180,40 @@ void MainWindow::AddPcapFilesToUI(const QStringList& INFiles){
 }
 
 std::string MainWindow::ConvertQString2String(const QString& qstr){
-    LOGMSG_INFO("IN");
-    LOGMSG_INFO("OUT");
-    // for unix
-    return qstr.toUtf8().constData();
+    LOGMSG_DEBUG("IN");
+    LOGMSG_DEBUG("OUT");
+#ifdef WINDOWS
     // for windows
     // return qstr.toLocal8Bit().constData(); // we get the current locale for the current system
+#else
+    // for unix
+    return qstr.toUtf8().constData();
+#endif
 }
 
 QString MainWindow::ConvertString2QString(const std::string& str){
-    LOGMSG_INFO("IN");
-    LOGMSG_INFO("OUT");
+    LOGMSG_DEBUG("IN");
+    LOGMSG_DEBUG("OUT");
     return QString::fromStdString(str);
 }
 
 std::vector<std::string> MainWindow::ConvertQStringList(const QStringList& qstrList){
-    LOGMSG_INFO("IN");
+    LOGMSG_DEBUG("IN");
     std::vector<std::string> result;
     for (qint32 i = 0; i < qstrList.length(); i++){
         result.push_back(ConvertQString2String(qstrList[i]));
     }
-    LOGMSG_INFO("OUT");
+    LOGMSG_DEBUG("OUT");
     return result;
 }
 
 QStringList MainWindow::ConvertVectorString(const std::vector<std::string>& vecStr){
-    LOGMSG_INFO("IN");
+    LOGMSG_DEBUG("IN");
     QStringList result;
     for (size_t i = 0; i < vecStr.size(); i++){
         result += ConvertString2QString(vecStr[i]);
     }
-    LOGMSG_INFO("OUT");
+    LOGMSG_DEBUG("OUT");
     return result;
 }
 
@@ -308,19 +311,52 @@ void MainWindow::onScheduler(){
 
 void MainWindow::onPlay(){
     LOGMSG_INFO("IN");
+
+    if (m_Compo.pConfig->GetPlayerStatus() == PlayerStatus::Play){
+        LOGMSG_INFO("OUT");
+        return;
+    }
+
     SwitchUIStatus_Play();
+
+    auto p = boost::make_shared<PlayerMsg>();
+    *p = PlayerMsg::Play;
+    m_Compo.pMsgQ->push(p);
+
     LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onPause(){
     LOGMSG_INFO("IN");
+
+    if (m_Compo.pConfig->GetPlayerStatus() == PlayerStatus::Pause){
+        LOGMSG_INFO("OUT");
+        return;
+    }
+
     SwitchUIStatus_Pause();
+
+    auto p = boost::make_shared<PlayerMsg>();
+    *p = PlayerMsg::Pause;
+    m_Compo.pMsgQ->push(p);
+
     LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onStop(){
     LOGMSG_INFO("IN");
+
+    if (m_Compo.pConfig->GetPlayerStatus() == PlayerStatus::Stop){
+        LOGMSG_INFO("OUT");
+        return;
+    }
+
     SwitchUIStatus_Stop();
+
+    auto p = boost::make_shared<PlayerMsg>();
+    *p = PlayerMsg::Stop;
+    m_Compo.pMsgQ->push(p);
+
     LOGMSG_INFO("OUT");
 }
 
