@@ -34,17 +34,26 @@ message(STATUS "BackEnd -     libraries: ${Qt5Widgets_LIBRARIES} ${Qt5Core_LIBRA
 message(STATUS "BackEnd -     include path: ${QT_INCLUDE_DIR}")
 
 file(GLOB BackEnd_src
-  "${PROJECT_SOURCE_DIR}/BackEnd/*.cpp"
-  "${PROJECT_SOURCE_DIR}/BackEnd/*.h"
   "${PROJECT_SOURCE_DIR}/BackEnd/PlayerEngine/*.cpp"
-  "${PROJECT_SOURCE_DIR}/BackEnd/PlayerEngine/*.h")
+  "${PROJECT_SOURCE_DIR}/BackEnd/PlayerEngine/*.h"
+  "${PROJECT_SOURCE_DIR}/BackEnd/*.cpp"
+  "${PROJECT_SOURCE_DIR}/BackEnd/*.h")
 
-include_directories(${PROJECT_SOURCE_DIR}/FrontEnd
+include_directories(${libpcap_INCLUDE_DIR}
+  ${PROJECT_SOURCE_DIR}/FrontEnd
   ${PROJECT_SOURCE_DIR}/BackEnd
   ${PROJECT_SOURCE_DIR}/BackEnd/PlayerEngine
   ${PROJECT_SOURCE_DIR}/Utils
   ${QT_INCLUDE_DIR}/QtWidgets
   ${Boost_INCLUDE_DIR})
+
+# variable checking
+# get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+# foreach(dir ${dirs})
+#   message(STATUS "Checking - dir='${dir}'")
+# endforeach()
+
+message(STATUS "BackEnd - libpcap include path: ${libpcap_INCLUDE_DIR}")
 
 add_executable(PcapReplayer ${BackEnd_src})
 add_dependencies(PcapReplayer FrontEnd Utils)
@@ -52,7 +61,8 @@ add_dependencies(PcapReplayer FrontEnd Utils)
 if (UNIX)
   file(GLOB BackEnd_lib
     ${PROJECT_BINARY_DIR}/FrontEnd/libFrontEnd.a
-    ${PROJECT_BINARY_DIR}/Utils/libUtils.a)
+    ${PROJECT_BINARY_DIR}/Utils/libUtils.a
+    ${libpcap_LIBRARY_DIR}/libpcap.a)
   target_link_libraries(PcapReplayer
     debug ${BackEnd_lib}
     optimized ${BackEnd_lib}

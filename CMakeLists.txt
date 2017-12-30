@@ -34,6 +34,15 @@ set(QT_INCLUDE_DIR "${QT_ROOT}include")
 set(QT_LIBRARY_DIR "${QT_ROOT}lib")
 set(CMAKE_PREFIX_PATH ${QT_ROOT})
 
+# Handle pcap libaries
+if (UNIX)
+  set(libpcap_ROOT "/usr/local/libpcap/1.8.1/")
+else ()
+  set(libpcap_ROOT "C:\\")
+endif ()
+set(libpcap_INCLUDE_DIR "${libpcap_ROOT}include")
+set(libpcap_LIBRARY_DIR "${libpcap_ROOT}lib")
+
 # Sub-directories where more CMakeLists.txt exist
 add_subdirectory(FrontEnd)
 add_subdirectory(BackEnd)

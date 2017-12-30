@@ -15,6 +15,7 @@ int main(int argc, char* argv[]){
 
     LOGMSG_INFO("IN");
 
+    // handle Config
     Config config;
     // handle BackEnd
     PlayerCtrlComponent PlayerCtrlCompo;
