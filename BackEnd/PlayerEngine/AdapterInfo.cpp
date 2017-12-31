@@ -1,8 +1,20 @@
 #include "AdapterInfo.h"
 
 #include "LogMgr.h"
+#include "pcap.h"
+
+#ifdef WINDOWS
+#include "Packet32.h"
+#include <ntddndis.h>
+#else
+#include "sys/socket.h"
+#include "sys/types.h"
+#include <netinet/in.h> // for sockaddr_in
+#include <arpa/inet.h> // for inet_ntop()
+#endif
 
 AdapterInfo::AdapterInfo(){
+    LOGMSG_INFO("IN");
     char errbuff[PCAP_ERRBUF_SIZE];
     m_vecAdapterName.clear();
     m_vecInterfaceInfo.clear();
@@ -42,12 +54,100 @@ AdapterInfo::AdapterInfo(){
                 m_vecAdapterName.push_back(pD->name);
                 m_vecInterfaceInfo.push_back(line);
                 m_vecIP.push_back(interfaceIP);
+#ifdef WINDOWS
                 m_vecMacAddress.push_back(GetMacAddress(m_vecAdapterName.back()));
+#endif
             }
         }
     }
+    LOGMSG_INFO("OUT");
 }
 
 AdapterInfo::~AdapterInfo(){
     
 }
+
+std::vector<std::string> AdapterInfo::GetAdapterName(){
+    return m_vecAdapterName;
+}
+
+std::vector<std::string> AdapterInfo::GetInterfaceInfo(){
+    return m_vecInterfaceInfo;
+}
+
+std::vector<std::string> AdapterInfo::GetIP(){
+    return m_vecIP;
+}
+
+#ifdef WINDOWS
+std::string AdapterInfo::GetMacAddress(const std::string& strAdapterName){
+    LPADAPTER	lpAdapter = 0;
+	DWORD		dwErrorCode;
+	PPACKET_OID_DATA  OidData;
+	BOOLEAN		Status;
+	std::string strMacAddress;
+
+	//
+	// Open the selected adapter
+	//
+
+	lpAdapter = PacketOpenAdapter((char*)(strAdapterName.c_str()));
+
+	if (!lpAdapter || (lpAdapter->hFile == INVALID_HANDLE_VALUE))
+	{
+		dwErrorCode = GetLastError();
+		TRACE(_T("Unable to open the adapter, Error Code : %lx\n"), dwErrorCode);
+
+		return std::string();
+	}
+
+	// 
+	// Allocate a buffer to get the MAC adress
+	//
+
+	OidData = (PPACKET_OID_DATA)malloc(6 + sizeof(PACKET_OID_DATA));
+	if (OidData == NULL)
+	{
+		TRACE(_T("error allocating memory!\n"));
+		PacketCloseAdapter(lpAdapter);
+		return std::string();
+	}
+
+	// 
+	// Retrieve the adapter MAC querying the NIC driver
+	//
+
+	OidData->Oid = OID_802_3_CURRENT_ADDRESS;
+
+	OidData->Length = 6;
+	ZeroMemory(OidData->Data, 6);
+
+	Status = PacketRequest(lpAdapter, FALSE, OidData);
+	if (Status)
+	{
+		// The MAC address of the adapter is
+		std::stringstream ss;
+		ss << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)((OidData->Data)[0]);
+		ss << ":";
+		ss << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)((OidData->Data)[1]);
+		ss << ":";
+		ss << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)((OidData->Data)[2]);
+		ss << ":";
+		ss << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)((OidData->Data)[3]);
+		ss << ":";
+		ss << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)((OidData->Data)[4]);
+		ss << ":";
+		ss << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)((OidData->Data)[5]);
+		strMacAddress = ss.str();
+	}
+	else
+	{
+		TRACE(_T("error retrieving the MAC address of the adapter!\n"));
+	}
+
+	free(OidData);
+	PacketCloseAdapter(lpAdapter);
+
+	return strMacAddress;
+}
+#endif

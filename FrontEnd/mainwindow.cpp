@@ -4,6 +4,8 @@
 #include "Config.h"
 #include "LogMgr.h"
 
+#include <sstream>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow){
@@ -34,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->BtnAddDstMap, SIGNAL(pressed()), this, SLOT(onAddDstMap()));
     connect(ui->BtnRemoveScrIPMap, SIGNAL(pressed()), this, SLOT(onRemoveScrMapIP()));
     connect(ui->BtnRemoveDstIPMap, SIGNAL(pressed()), this, SLOT(onRemoveDstMapIP()));
+    // handle comboBox
+    connect(ui->comboBox_InterfaceList, SIGNAL(activated(int)), this, SLOT(onSelectInterface(int)));
 
     m_strCurAppPath = QDir::currentPath();
 
@@ -52,6 +56,14 @@ MainWindow::~MainWindow(){
 void MainWindow::InitComponent(const MainWindowComponent& InCompo){
     LOGMSG_INFO("IN");
     m_Compo = InCompo;
+
+    // handle UI
+    ui->comboBox_InterfaceList->clear();
+    auto vecTemp = m_Compo.pConfig->GetInterfaceInfo();
+    for (size_t i = 0; i < vecTemp.size(); i++){
+        ui->comboBox_InterfaceList->addItem(ConvertString2QString(vecTemp[i]));
+        ui->comboBox_InterfaceList->setCurrentIndex(0);
+    }
     LOGMSG_INFO("OUT");
 }
 
@@ -180,20 +192,14 @@ void MainWindow::AddPcapFilesToUI(const QStringList& INFiles){
 }
 
 std::string MainWindow::ConvertQString2String(const QString& qstr){
-    LOGMSG_DEBUG("IN");
-    LOGMSG_DEBUG("OUT");
 #ifdef WINDOWS
-    // for windows
-    // return qstr.toLocal8Bit().constData(); // we get the current locale for the current system
+    return qstr.toLocal8Bit().constData(); // we get the current locale for the current system
 #else
-    // for unix
     return qstr.toUtf8().constData();
 #endif
 }
 
 QString MainWindow::ConvertString2QString(const std::string& str){
-    LOGMSG_DEBUG("IN");
-    LOGMSG_DEBUG("OUT");
     return QString::fromStdString(str);
 }
 
@@ -425,4 +431,8 @@ void MainWindow::onRemoveDstMapIP(){
     TestingBox.show();
     TestingBox.exec();
     LOGMSG_INFO("OUT");
+}
+
+void MainWindow::onSelectInterface(int nSelect){
+    m_Compo.pConfig->SetAdapterIdx(nSelect);
 }

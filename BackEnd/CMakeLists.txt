@@ -62,7 +62,7 @@ if (UNIX)
   file(GLOB BackEnd_lib
     ${PROJECT_BINARY_DIR}/FrontEnd/libFrontEnd.a
     ${PROJECT_BINARY_DIR}/Utils/libUtils.a
-    ${libpcap_LIBRARY_DIR}/libpcap.a)
+    ${libpcap_LIBRARY_DIR}/libpcap.so.1.8.1)
   target_link_libraries(PcapReplayer
     debug ${BackEnd_lib}
     optimized ${BackEnd_lib}

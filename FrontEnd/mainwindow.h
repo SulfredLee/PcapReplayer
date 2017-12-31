@@ -69,6 +69,7 @@ private slots:
     void onAddDstMap();
     void onRemoveScrMapIP();
     void onRemoveDstMapIP();
+    void onSelectInterface(int);
 };
 
 #endif // MAINWINDOW_H

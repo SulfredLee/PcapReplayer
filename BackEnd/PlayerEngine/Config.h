@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "Common.h"
+#include "AdapterInfo.h"
 
 class Config{
 public:
@@ -20,9 +21,19 @@ public:
     void SetPlayerStatus(const PlayerStatus& INStatus);
     std::string GetLatestFilePath();
     PlayerStatus GetPlayerStatus();
+
+    // handle AdapterInfo
+    std::vector<std::string> GetAdapterName();
+    std::vector<std::string> GetInterfaceInfo();
+    std::vector<std::string> GetIP();
+    int GetAdapterIdx();
+    void SetAdapterIdx(const int& nSelect);
+
 private:
     std::vector<std::string> m_PcapFiles;
     std::string m_strLatestFilePath;
     PlayerStatus m_PlayerStatus;
+    AdapterInfo m_AdapterInfo;
+    int m_nAdapterIdx; // indicating user selected adapter index
 };
 #endif

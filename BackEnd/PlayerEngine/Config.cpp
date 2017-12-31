@@ -4,6 +4,7 @@
 Config::Config(){
     LOGMSG_INFO("IN");
     m_PlayerStatus = PlayerStatus::Stop;
+    m_nAdapterIdx = 0;
     LOGMSG_INFO("OUT");
 }
 
@@ -61,4 +62,24 @@ PlayerStatus Config::GetPlayerStatus(){
 
     LOGMSG_INFO("OUT");
     return m_PlayerStatus;
+}
+
+std::vector<std::string> Config::GetAdapterName(){
+    return m_AdapterInfo.GetAdapterName();
+}
+
+std::vector<std::string> Config::GetInterfaceInfo(){
+    return m_AdapterInfo.GetInterfaceInfo();
+}
+
+std::vector<std::string> Config::GetIP(){
+    return m_AdapterInfo.GetIP();
+}
+
+int Config::GetAdapterIdx(){
+    return m_nAdapterIdx;
+}
+
+void Config::SetAdapterIdx(const int& nSelect){
+    m_nAdapterIdx = nSelect;
 }

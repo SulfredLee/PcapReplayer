@@ -23,7 +23,8 @@ file(GLOB PlayerEngine_src
   "${PROJECT_SOURCE_DIR}/BackEnd/PlayerEngine/*.cpp"
   "${PROJECT_SOURCE_DIR}/BackEnd/PlayerEngine/*.h")
 
-include_directories(${QT_INCLUDE_DIR}
+include_directories(${libpcap_INCLUDE_DIR}
+  ${QT_INCLUDE_DIR}
   ${PROJECT_SOURCE_DIR}/FrontEnd
   ${PROJECT_SOURCE_DIR}/BackEnd/PlayerEngine
   ${PROJECT_SOURCE_DIR}/Utils
