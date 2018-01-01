@@ -5,6 +5,7 @@
 #include "LogMgr.h"
 
 #include <sstream>
+#include <stdio.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -38,11 +39,25 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->BtnRemoveDstIPMap, SIGNAL(pressed()), this, SLOT(onRemoveDstMapIP()));
     // handle comboBox
     connect(ui->comboBox_InterfaceList, SIGNAL(activated(int)), this, SLOT(onSelectInterface(int)));
+    // handle callback from PlayerCtrl
+    connect(this, SIGNAL(onPlay_FromPlayerCtrl()), this, SLOT(onPlay()));
+    connect(this, SIGNAL(onPause_FromPlayerCtrl()), this, SLOT(onPause()));
+    connect(this, SIGNAL(onStop_FromPlayerCtrl()), this, SLOT(onStop()));
+    connect(this, SIGNAL(onProgressBar_FromPlayerCtrl(int)), this, SLOT(onProgressBar(int)));
+    connect(this, SIGNAL(onStatusBar_SentByte_FromPlayerCtrl(int)), this, SLOT(onStatusBar_SentByte(int)));
+    connect(this, SIGNAL(onStatusBar_CurPktTime_FromPlayerCtrl(double)), this, SLOT(onStatusBar_CurPktTime(double)));
+    connect(this, SIGNAL(onStatusBar_Invalidate_FromPlayerCtrl()), this, SLOT(onStatusBar_Invalidate()));
 
-    m_strCurAppPath = QDir::currentPath();
+    m_qstrCurAppPath = QDir::currentPath();
+
+    // handle validator
+    ui->lineEdit_SpeedFactor->setValidator(new QDoubleValidator(0, 40000, 4, this));
+    ui->lineEdit_SpeedLimit->setValidator(new QDoubleValidator(-1, 40000, 4, this));
 
     // handle UI status
     SwitchUIStatus_Init();
+    ui->lineEdit_SpeedFactor->insert("1.0");
+    ui->lineEdit_SpeedLimit->insert("-1.0");
 
     LOGMSG_INFO("OUT");
 }
@@ -57,6 +72,7 @@ void MainWindow::InitComponent(const MainWindowComponent& InCompo){
     LOGMSG_INFO("IN");
     m_Compo = InCompo;
 
+    // handle config
     // handle UI
     ui->comboBox_InterfaceList->clear();
     auto vecTemp = m_Compo.pConfig->GetInterfaceInfo();
@@ -85,8 +101,14 @@ void MainWindow::SwitchUIStatus_Init(){
     ui->BtnPlay->setEnabled(true);
     ui->BtnPause->setEnabled(false);
     ui->BtnStop->setEnabled(false);
-    ui->BtnRemove->setEnabled(false);
-    ui->BtnRemoveAll->setEnabled(false);
+    if (ui->listWidget_FileList->count() == 0){
+        ui->BtnRemove->setEnabled(false);
+        ui->BtnRemoveAll->setEnabled(false);
+    }
+    else{
+        ui->BtnRemove->setEnabled(true);
+        ui->BtnRemoveAll->setEnabled(true);
+    }
     ui->BtnRegularPlay->setEnabled(true);
     ui->BtnAddSrcMap->setEnabled(true);
     ui->BtnAddDstMap->setEnabled(true);
@@ -110,8 +132,9 @@ void MainWindow::SwitchUIStatus_Init(){
     LOGMSG_INFO("OUT");
 }
 
-void MainWindow::SwitchUIStatus_Play(){
+void MainWindow::SwitchUIStatus_Play_Pause(){
     LOGMSG_INFO("IN");
+    // handle any status to Play or Pause
     // handle Menu Action
     ui->actionOpen_File_Menu->setEnabled(false);
     ui->actionOpen_Folder_Menu->setEnabled(false);
@@ -125,8 +148,6 @@ void MainWindow::SwitchUIStatus_Play(){
     ui->actionLoad_Config_ToolBar->setEnabled(false);
     ui->actionScheduler_ToolBar->setEnabled(false);
     // hanlde Push Button
-    ui->BtnPlay->setEnabled(false);
-    ui->BtnPause->setEnabled(true);
     ui->BtnStop->setEnabled(true);
     ui->BtnRemove->setEnabled(false);
     ui->BtnRemoveAll->setEnabled(false);
@@ -135,10 +156,6 @@ void MainWindow::SwitchUIStatus_Play(){
     ui->BtnAddDstMap->setEnabled(false);
     ui->BtnRemoveScrIPMap->setEnabled(false);
     ui->BtnRemoveDstIPMap->setEnabled(false);
-    // handle Line Edit
-    ui->lineEdit_SpeedFactor->setEnabled(false);
-    ui->lineEdit_LoopCount->setEnabled(false);
-    ui->lineEdit_SpeedLimit->setEnabled(false);
     // handle Combo Box
     ui->comboBox_InterfaceList->setEnabled(false);
     // handle List Widget
@@ -146,17 +163,30 @@ void MainWindow::SwitchUIStatus_Play(){
     // handle Table Widget
     ui->tableWidget_NetMapDst->setEnabled(false);
     ui->tableWidget_NetMapSrc->setEnabled(false);
-    // handle Progress Bar
-    ui->progressBar->setValue(0);
-    LOGMSG_INFO("OUT");
-}
 
-void MainWindow::SwitchUIStatus_Pause(){
-    LOGMSG_INFO("IN");
-    SwitchUIStatus_Play();
-    // handle Difference
-    ui->BtnPlay->setEnabled(true);
-    ui->BtnPause->setEnabled(false);
+    // handle Difference between Pause and Play
+    if (m_Compo.pConfig->GetPlayerStatus() == PlayerStatus::Stop // handle from Stop to Play
+        || m_Compo.pConfig->GetPlayerStatus() == PlayerStatus::Pause){ // handle from Pause to Play
+        // handle Line Edit
+        ui->lineEdit_SpeedFactor->setEnabled(false);
+        ui->lineEdit_LoopCount->setEnabled(false);
+        ui->lineEdit_SpeedLimit->setEnabled(false);
+        // hanlde Push Button
+        ui->BtnPlay->setEnabled(false);
+        ui->BtnPause->setEnabled(true);
+        if (m_Compo.pConfig->GetPlayerStatus() == PlayerStatus::Stop){ // handle from Stop to Play
+            // handle Progress Bar
+            ui->progressBar->setValue(0);
+        }
+    } else if (m_Compo.pConfig->GetPlayerStatus() == PlayerStatus::Play){ // handle from Play to Pause
+        // handle Line Edit
+        ui->lineEdit_SpeedFactor->setEnabled(true);
+        ui->lineEdit_LoopCount->setEnabled(true);
+        ui->lineEdit_SpeedLimit->setEnabled(true);
+        // hanlde Push Button
+        ui->BtnPlay->setEnabled(true);
+        ui->BtnPause->setEnabled(false);
+    }
     LOGMSG_INFO("OUT");
 }
 
@@ -189,6 +219,34 @@ void MainWindow::AddPcapFilesToUI(const QStringList& INFiles){
     }
     ui->listWidget_FileList->setCurrentRow(0);
     LOGMSG_INFO("OUT");
+}
+
+void MainWindow::GetBitPerSec(double bit, QString& line, int step){
+    if (step >= 4)
+        return;
+
+    line = QString::number(bit);
+    switch (step)
+        {
+        case 0:
+            line += " Bit/sec";
+            break;
+        case 1:
+            line += " KBit/sec";
+            break;
+        case 2:
+            line += " MBit/sec";
+            break;
+        case 3:
+            line += " GBit/sec";
+            break;
+        default:
+            break;
+        }
+
+    int newBit = bit / 1000;
+    if (newBit > 0)
+        GetBitPerSec(bit / 1000, line, step + 1);
 }
 
 std::string MainWindow::ConvertQString2String(const QString& qstr){
@@ -230,13 +288,31 @@ bool MainWindow::IsFileExists(const QString& qstrPath){
     return (check_file.exists() && check_file.isFile());
 }
 
+QString MainWindow::ConvertTime2QString(double dTime){
+    struct timeval tv;
+    time_t nowtime;
+    struct tm *nowtm;
+    char tmbuf[64], buf[64];
+
+    nowtime = (int)dTime;
+    nowtm = localtime(&nowtime);
+    strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d,%H:%M:%S", nowtm);
+#ifdef WINDOWS
+    sprintf_s(buf, sizeof buf, "%s.%06d", tmbuf, (long)((dTime - (unsigned int)dTime) * 1000000));
+#else
+    sprintf(buf, "%s.%06d", tmbuf, (long)((dTime - (unsigned int)dTime) * 1000000));
+#endif
+
+    return QString(buf);
+}
+
 void MainWindow::onOpen_File(){
     LOGMSG_INFO("IN");
     QStringList fileNames; // fileNames contains full path with file name
     if (m_Compo.pConfig->GetLatestFilePath() == "")
         fileNames = QFileDialog::getOpenFileNames(this,
                                                   tr("Open Pcap"),
-                                                  m_strCurAppPath,
+                                                  m_qstrCurAppPath,
                                                   tr("Pcap Files (*.pcap)"));
     else
         fileNames = QFileDialog::getOpenFileNames(this,
@@ -260,7 +336,7 @@ void MainWindow::onOpen_Folder(){
     if (m_Compo.pConfig->GetLatestFilePath() == "")
         strFilePath = QFileDialog::getExistingDirectory(this,
                                                         "",
-                                                        m_strCurAppPath,
+                                                        m_qstrCurAppPath,
                                                         QFileDialog::ShowDirsOnly);
     else
         strFilePath = QFileDialog::getExistingDirectory(this,
@@ -323,8 +399,13 @@ void MainWindow::onPlay(){
         return;
     }
 
-    SwitchUIStatus_Play();
+    // handle UI
+    SwitchUIStatus_Play_Pause();
 
+    // handle Config
+    m_Compo.pConfig->SetSpeedFactor(ui->lineEdit_SpeedFactor->text().toDouble());
+
+    // handle Ctrl
     auto p = boost::make_shared<PlayerMsg>();
     *p = PlayerMsg::Play;
     m_Compo.pMsgQ->push(p);
@@ -340,7 +421,7 @@ void MainWindow::onPause(){
         return;
     }
 
-    SwitchUIStatus_Pause();
+    SwitchUIStatus_Play_Pause();
 
     auto p = boost::make_shared<PlayerMsg>();
     *p = PlayerMsg::Pause;
@@ -393,7 +474,7 @@ void MainWindow::onRemoveAll(){
 
 void MainWindow::onRegularPaly(){
     LOGMSG_INFO("IN");
-    SwitchUIStatus_Play();
+    SwitchUIStatus_Play_Pause();
     LOGMSG_INFO("OUT");
 }
 
@@ -435,4 +516,23 @@ void MainWindow::onRemoveDstMapIP(){
 
 void MainWindow::onSelectInterface(int nSelect){
     m_Compo.pConfig->SetAdapterIdx(nSelect);
+}
+
+void MainWindow::onProgressBar(int nValue){
+    ui->progressBar->setValue(nValue);
+}
+
+void MainWindow::onStatusBar_SentByte(int nSentByte){
+    GetBitPerSec(nSentByte * 8, m_qstrSentByte, 0);
+    // LOGMSG_INFO(ConvertQString2String(m_qstrSentByte));
+}
+
+void MainWindow::onStatusBar_CurPktTime(double dCurPktTime){
+    m_qstrCurPktTime = ConvertTime2QString(dCurPktTime);
+}
+
+void MainWindow::onStatusBar_Invalidate(){
+    QString qstrTempLine;
+    qstrTempLine = m_qstrSentByte + "    " + m_qstrCurPktTime;
+    ui->statusbar->showMessage(qstrTempLine);
 }

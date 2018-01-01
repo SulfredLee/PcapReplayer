@@ -1,13 +1,30 @@
 #ifndef PLAYERCTRL_H
 #define PLAYERCTRL_H
 
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
+#include <boost/chrono.hpp>
+#include <boost/atomic.hpp>
+#include <boost/timer.hpp>
+
 #include "Common.h"
 #include "MsgQ.h"
+#include "PcapReader.h"
+#include "PcapSender.h"
+#include "SpeedCtrl.h"
+
+#include <string>
+#include <sstream>
 
 class Config;
+class MainWindow;
 
 struct PlayerCtrlComponent{
     Config* pConfig;
+    MainWindow* pMainWindow;
 };
 
 class PlayerCtrl{
@@ -21,10 +38,22 @@ private:
     void ProcessStop();
     void ProcessPause();
     void ProcessPlay();
-    void Main();
+    void Process_PcapReader(pcap_pkthdr* pHeader, const unsigned char* pData, int nProgress);
+    void Process_SpeedCtrl(pcap_pkthdr* pHeader, const unsigned char* pData, unsigned int unSentByte);
+    void Process_PcapSender(pcap_pkthdr* pHeader, const unsigned char* pData);
+    void MsgQMain();
+    void ReplayMain();
 private:
     MsgQ<PlayerMsg> m_MsgQ;
     PlayerCtrlComponent m_Compo;
+    PcapReader m_PcapReader;
+    SpeedCtrl m_SpeedCtrl;
+    PcapSender m_PcapSender;
+    boost::thread m_ReplayThread;
+    boost::thread m_MsgQThread;
+    boost::atomic<bool> m_bPause;
+    int m_nPreProgress; // previous progressBar status
+    unsigned int m_unPreSentByte; // sent bit within one second
 };
 
 #endif

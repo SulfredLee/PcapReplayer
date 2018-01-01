@@ -222,7 +222,7 @@ namespace Logging
             boost::log::add_file_log(
                                      //boost::log::keywords::file_name = "./Log/Log_%Y%m%d_%H%M%S_%5N.log",
                                      boost::log::keywords::file_name = "./Log/Log_%Y%m%d_%5N.log",
-                                     boost::log::keywords::rotation_size = 1 * 1024 * 1024,
+                                     boost::log::keywords::rotation_size = 10 * 1024 * 1024, // 10 MB for every file
                                      boost::log::keywords::max_size = 20 * 1024 * 1024,
                                      boost::log::keywords::time_based_rotation = boost::log::sinks::file::rotation_at_time_point(0, 0, 0),
                                      boost::log::keywords::format = COMMON_FMT,

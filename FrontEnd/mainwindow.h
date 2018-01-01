@@ -34,23 +34,33 @@ public:
 
     void InitComponent(const MainWindowComponent& InCompo);
     void SwitchUIStatus_Init();
-    void SwitchUIStatus_Play();
-    void SwitchUIStatus_Pause();
+    void SwitchUIStatus_Play_Pause();
     void SwitchUIStatus_Stop();
 private:
     void AddPcapFilesToUI(const QStringList& INFiles);
+    void GetBitPerSec(double bit, QString& line, int step);
 private: // local utils
     std::string ConvertQString2String(const QString& qstr);
     QString ConvertString2QString(const std::string& str);
     std::vector<std::string> ConvertQStringList(const QStringList& qstrList);
     QStringList ConvertVectorString(const std::vector<std::string>& vecStr);
     bool IsFileExists(const QString& qstrPath);
+    QString ConvertTime2QString(double dTime);
 private:
     Ui::MainWindow *ui;
 
-    QString m_strCurAppPath;
+    QString m_qstrCurAppPath;
+    QString m_qstrSentByte;
+    QString m_qstrCurPktTime;
     MainWindowComponent m_Compo;
-
+signals:
+    void onPlay_FromPlayerCtrl();
+    void onPause_FromPlayerCtrl();
+    void onStop_FromPlayerCtrl();
+    void onProgressBar_FromPlayerCtrl(int);
+    void onStatusBar_SentByte_FromPlayerCtrl(int);
+    void onStatusBar_CurPktTime_FromPlayerCtrl(double);
+    void onStatusBar_Invalidate_FromPlayerCtrl();
 private slots:
     // handle menu and tool bar
     void onOpen_File();
@@ -70,6 +80,12 @@ private slots:
     void onRemoveScrMapIP();
     void onRemoveDstMapIP();
     void onSelectInterface(int);
+    // handle progressBar
+    void onProgressBar(int);
+    // handle statusBar
+    void onStatusBar_SentByte(int);
+    void onStatusBar_CurPktTime(double);
+    void onStatusBar_Invalidate();
 };
 
 #endif // MAINWINDOW_H

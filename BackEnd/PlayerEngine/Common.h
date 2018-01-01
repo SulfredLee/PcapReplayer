@@ -12,4 +12,8 @@ enum class PlayerMsg{
     Pause,
     Play
 };
+
+const unsigned int PCAPGOBLEHEADERSIZE = 24;
+const unsigned int PCAPLOCALHEADERSIZE = 16;
+const unsigned int DATAGRAME_DATA_OFFSET = 42;
 #endif

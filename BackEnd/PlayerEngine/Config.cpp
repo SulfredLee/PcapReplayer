@@ -5,6 +5,7 @@ Config::Config(){
     LOGMSG_INFO("IN");
     m_PlayerStatus = PlayerStatus::Stop;
     m_nAdapterIdx = 0;
+    m_dSpeedFactor = 1;
     LOGMSG_INFO("OUT");
 }
 
@@ -28,6 +29,10 @@ void Config::RemoveAllPcapFile(){
     LOGMSG_INFO("IN");
     m_PcapFiles.clear();
     LOGMSG_INFO("OUT");
+}
+
+std::vector<std::string> Config::GetPcapFiles(){
+    return m_PcapFiles;
 }
 
 void Config::SetLatestFilePath(const std::string& INStr){
@@ -54,13 +59,6 @@ std::string Config::GetLatestFilePath(){
 }
 
 PlayerStatus Config::GetPlayerStatus(){
-    LOGMSG_INFO("IN");
-
-    std::stringstream ssLog;
-    ssLog << (int)m_PlayerStatus;
-    LOGMSG_INFO(ssLog.str());
-
-    LOGMSG_INFO("OUT");
     return m_PlayerStatus;
 }
 
@@ -82,4 +80,15 @@ int Config::GetAdapterIdx(){
 
 void Config::SetAdapterIdx(const int& nSelect){
     m_nAdapterIdx = nSelect;
+}
+
+void Config::SetSpeedFactor(const double& dSpeedFactor){
+    m_dSpeedFactor = dSpeedFactor;
+    std::stringstream ssTempLine;
+    ssTempLine << m_dSpeedFactor;
+    LOGMSG_INFO(ssTempLine.str());
+}
+
+double Config::GetSpeedFactor(){
+    return m_dSpeedFactor;
 }

@@ -15,17 +15,19 @@ int main(int argc, char* argv[]){
 
     LOGMSG_INFO("IN");
 
-    // handle Config
+    // Init all component
     Config config;
-    // handle BackEnd
+    MainWindowComponent MainWindowCompo;
+    MainWindow MW;
     PlayerCtrlComponent PlayerCtrlCompo;
     PlayerCtrl playerCtrl;
+
+    // handle BackEnd
     PlayerCtrlCompo.pConfig = &config;
+    PlayerCtrlCompo.pMainWindow = &MW;
     playerCtrl.InitComponent(PlayerCtrlCompo);
 
     // handle FrontEnd
-    MainWindowComponent MainWindowCompo;
-    MainWindow MW;
     MainWindowCompo.pConfig = &config;
     MainWindowCompo.pMsgQ = playerCtrl.GetMsgQ();
     MW.InitComponent(MainWindowCompo);
