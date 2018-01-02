@@ -92,3 +92,19 @@ void Config::SetSpeedFactor(const double& dSpeedFactor){
 double Config::GetSpeedFactor(){
     return m_dSpeedFactor;
 }
+
+void Config::SetSpeedLimit(const double& dSpeedLimit){
+    m_dSpeedLimit = dSpeedLimit;
+}
+
+double Config::GetSpeedLimit(){
+    return m_dSpeedLimit;
+}
+
+void Config::SetLoopCount(const int& nLoopCount){
+    m_nLoopCount = nLoopCount;
+}
+
+int Config::GetLoopCount(){
+    return m_nLoopCount;
+}

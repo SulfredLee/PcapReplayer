@@ -34,6 +34,12 @@ public:
     // handle Speed
     void SetSpeedFactor(const double& dSpeedFactor);
     double GetSpeedFactor();
+    void SetSpeedLimit(const double& dSpeedLimit);
+    double GetSpeedLimit();
+
+    // handle Loop
+    void SetLoopCount(const int& nLoopCount);
+    int GetLoopCount();
 private:
     std::vector<std::string> m_PcapFiles;
     std::string m_strLatestFilePath;
@@ -41,5 +47,7 @@ private:
     AdapterInfo m_AdapterInfo;
     int m_nAdapterIdx; // indicating user selected adapter index
     double m_dSpeedFactor;
+    double m_dSpeedLimit; // MBit/s
+    int m_nLoopCount;
 };
 #endif

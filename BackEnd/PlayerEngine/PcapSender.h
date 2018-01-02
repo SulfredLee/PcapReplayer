@@ -15,8 +15,8 @@ public:
     void InitComponent(boost::function<void (pcap_pkthdr*, const unsigned char*)> f,
                        Config* pConfig);
     void SendPacket(pcap_pkthdr* pHeader, const unsigned char* pData);
-private:
     void SetAdapter();
+private:
 private:
     Config* m_pConfig;
     pcap_t* m_pAdapter;

@@ -12,6 +12,7 @@ PlayerCtrl::PlayerCtrl()
 
     m_bPause = false;
     m_nPreProgress = -1;
+    m_nLoopCount = -1;
 
     LOGMSG_INFO("OUT");
 }
@@ -33,12 +34,13 @@ PlayerCtrl::~PlayerCtrl(){
 void PlayerCtrl::InitComponent(const PlayerCtrlComponent& InCompo){
     LOGMSG_INFO("IN");
     m_Compo = InCompo;
-
     // handle Replay pipe line
     m_PcapReader.InitComponent(boost::bind(&PlayerCtrl::Process_PcapReader, this, _1, _2, _3));
     m_SpeedCtrl.InitComponent(boost::bind(&PlayerCtrl::Process_SpeedCtrl_1, this, _1, _2),
                               boost::bind(&PlayerCtrl::Process_SpeedCtrl_2, this, _1, _2),
                               m_Compo.pConfig);
+    m_PcapSender.InitComponent(boost::bind(&PlayerCtrl::Process_PcapSender, this, _1, _2),
+                               m_Compo.pConfig);
     LOGMSG_INFO("OUT");
 }
 
@@ -60,6 +62,8 @@ void PlayerCtrl::ProcessStop(){
 
     // we stop the current replay
     m_ReplayThread.interrupt();
+
+    m_SpeedCtrl.Reset();
 
     LOGMSG_INFO("OUT");
 }
@@ -89,13 +93,21 @@ void PlayerCtrl::ProcessPlay(){
     }else if (m_Compo.pConfig->GetPlayerStatus() == PlayerStatus::Pause){
         m_Compo.pConfig->SetPlayerStatus(PlayerStatus::Play);
         m_bPause = false;
+
+        m_SpeedCtrl.Reset();
+        m_nLoopCount = m_Compo.pConfig->GetLoopCount();
+        emit m_Compo.pMainWindow->onStatusBar_RemainLoopCount_FromPlayerCtrl(m_nLoopCount - 1);
+
         LOGMSG_INFO("OUT");
         return;
     }else{
         m_Compo.pConfig->SetPlayerStatus(PlayerStatus::Play);
         m_bPause = false;
-        m_PcapSender.InitComponent(boost::bind(&PlayerCtrl::Process_PcapSender, this, _1, _2),
-                                   m_Compo.pConfig);
+
+        m_SpeedCtrl.Reset();
+        m_PcapSender.SetAdapter();
+        m_nLoopCount = m_Compo.pConfig->GetLoopCount();
+
         m_ReplayThread = boost::thread(&PlayerCtrl::ReplayMain, this);
         LOGMSG_INFO("OUT");
         return;
@@ -157,21 +169,30 @@ void PlayerCtrl::MsgQMain(){
 void PlayerCtrl::ReplayMain(){
     LOGMSG_INFO("IN");
     auto vecPcapFiles = m_Compo.pConfig->GetPcapFiles();
-    for (size_t i = 0; i < vecPcapFiles.size(); i++){
-        if (m_Compo.pConfig->GetPlayerStatus() == PlayerStatus::Stop){
-            break;
-        }
-        // todo: replay file one by one
+    do{
         std::stringstream ssLine;
-        ssLine << "Start to replay: " << vecPcapFiles[i];
+        ssLine << "Remain Loop Count: " << m_nLoopCount - 1;
         LOGMSG_INFO(ssLine.str());
 
-        m_PcapReader.ReadFile(vecPcapFiles[i]);
+        emit m_Compo.pMainWindow->onStatusBar_RemainLoopCount_FromPlayerCtrl(m_nLoopCount - 1);
 
-        ssLine.str(std::string());
-        ssLine << "Finish replay: " << vecPcapFiles[i];
-        LOGMSG_INFO(ssLine.str());
-    }
+        m_SpeedCtrl.Reset();
+        for (size_t i = 0; i < vecPcapFiles.size(); i++){
+            if (m_Compo.pConfig->GetPlayerStatus() == PlayerStatus::Stop){
+                break;
+            }
+            // todo: replay file one by one
+            ssLine.str(std::string());
+            ssLine << "Start to replay: " << vecPcapFiles[i];
+            LOGMSG_INFO(ssLine.str());
+
+            m_PcapReader.ReadFile(vecPcapFiles[i]);
+
+            ssLine.str(std::string());
+            ssLine << "Finish replay: " << vecPcapFiles[i];
+            LOGMSG_INFO(ssLine.str());
+        }
+    }while (--m_nLoopCount > 0);
     // always return to stop UI status when all files are finished
     emit m_Compo.pMainWindow->onStop_FromPlayerCtrl();
     LOGMSG_INFO("OUT");

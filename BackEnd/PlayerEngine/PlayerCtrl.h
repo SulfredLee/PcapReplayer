@@ -54,6 +54,7 @@ private:
     boost::thread m_MsgQThread;
     boost::atomic<bool> m_bPause;
     int m_nPreProgress; // previous progressBar status
+    int m_nLoopCount;
 };
 
 #endif

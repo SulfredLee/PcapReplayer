@@ -24,6 +24,7 @@ public:
                        boost::function<void (unsigned int, double)> fn_2,
                        Config* pConfig);
     void SendPacket(pcap_pkthdr* pHeader, const unsigned char* pData);
+    void Reset();
 private:
     void SpeedFactorTimerCallback();
     void OneSecTimerCallback();

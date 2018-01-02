@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(onProgressBar_FromPlayerCtrl(int)), this, SLOT(onProgressBar(int)));
     connect(this, SIGNAL(onStatusBar_SentByte_FromPlayerCtrl(int)), this, SLOT(onStatusBar_SentByte(int)));
     connect(this, SIGNAL(onStatusBar_CurPktTime_FromPlayerCtrl(double)), this, SLOT(onStatusBar_CurPktTime(double)));
+    connect(this, SIGNAL(onStatusBar_RemainLoopCount_FromPlayerCtrl(int)), this, SLOT(onStatusBar_RemainLoopCount(int)));
     connect(this, SIGNAL(onStatusBar_Invalidate_FromPlayerCtrl()), this, SLOT(onStatusBar_Invalidate()));
 
     m_qstrCurAppPath = QDir::currentPath();
@@ -53,11 +54,13 @@ MainWindow::MainWindow(QWidget *parent) :
     // handle validator
     ui->lineEdit_SpeedFactor->setValidator(new QDoubleValidator(0, 40000, 4, this));
     ui->lineEdit_SpeedLimit->setValidator(new QDoubleValidator(-1, 40000, 4, this));
+    ui->lineEdit_LoopCount->setValidator(new QIntValidator(-1, 100, this));
 
     // handle UI status
     SwitchUIStatus_Init();
     ui->lineEdit_SpeedFactor->insert("1.0");
     ui->lineEdit_SpeedLimit->insert("-1.0");
+    ui->lineEdit_LoopCount->insert("-1");
 
     LOGMSG_INFO("OUT");
 }
@@ -404,6 +407,8 @@ void MainWindow::onPlay(){
 
     // handle Config
     m_Compo.pConfig->SetSpeedFactor(ui->lineEdit_SpeedFactor->text().toDouble());
+    m_Compo.pConfig->SetSpeedLimit(ui->lineEdit_SpeedLimit->text().toDouble() * 1000 * 1000);
+    m_Compo.pConfig->SetLoopCount(ui->lineEdit_LoopCount->text().toInt());
 
     // handle Ctrl
     auto p = boost::make_shared<PlayerMsg>();
@@ -531,8 +536,12 @@ void MainWindow::onStatusBar_CurPktTime(double dCurPktTime){
     m_qstrCurPktTime = ConvertTime2QString(dCurPktTime);
 }
 
+void MainWindow::onStatusBar_RemainLoopCount(int nRemainLoopCount){
+    m_qstrRemainLoopCount = "Remain Loop: " + QString::number(nRemainLoopCount);
+}
+
 void MainWindow::onStatusBar_Invalidate(){
     QString qstrTempLine;
-    qstrTempLine = m_qstrSentByte + "    " + m_qstrCurPktTime;
+    qstrTempLine = m_qstrRemainLoopCount + "    " + m_qstrSentByte + "    " + m_qstrCurPktTime;
     ui->statusbar->showMessage(qstrTempLine);
 }
