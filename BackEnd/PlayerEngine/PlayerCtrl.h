@@ -39,7 +39,8 @@ private:
     void ProcessPause();
     void ProcessPlay();
     void Process_PcapReader(pcap_pkthdr* pHeader, const unsigned char* pData, int nProgress);
-    void Process_SpeedCtrl(pcap_pkthdr* pHeader, const unsigned char* pData, unsigned int unSentByte);
+    void Process_SpeedCtrl_1(pcap_pkthdr* pHeader, const unsigned char* pData);
+    void Process_SpeedCtrl_2(unsigned int unSentByte, double dPktTime);
     void Process_PcapSender(pcap_pkthdr* pHeader, const unsigned char* pData);
     void MsgQMain();
     void ReplayMain();
@@ -53,7 +54,6 @@ private:
     boost::thread m_MsgQThread;
     boost::atomic<bool> m_bPause;
     int m_nPreProgress; // previous progressBar status
-    unsigned int m_unPreSentByte; // sent bit within one second
 };
 
 #endif

@@ -6,19 +6,19 @@ SpeedCtrl::SpeedCtrl()
     : m_SpeedFactorTimer(100, boost::bind(&SpeedCtrl::SpeedFactorTimerCallback, this))
     , m_OneSecTimer(1000, boost::bind(&SpeedCtrl::OneSecTimerCallback, this)){
     m_dNextSendTime = 0;
-    m_unCurSentByte = 0;
-    m_unPreSentByte = 0;
+    m_dPktArrivalTime = 0;
+    m_unSentByte = 0;
 }
 
 SpeedCtrl::~SpeedCtrl(){
 }
 
-void SpeedCtrl::InitComponent(boost::function<void (pcap_pkthdr* pHeader,
-                                                    const unsigned char* pData,
-                                                    unsigned int unSentByte)> f,
+void SpeedCtrl::InitComponent(boost::function<void (pcap_pkthdr*, const unsigned char*)> fn_1,
+                              boost::function<void (unsigned int, double)> fn_2,
                               Config* pConfig){
     m_pConfig = pConfig;
-    m_fOutputCallback = f;
+    m_fn_1 = fn_1;
+    m_fn_2 = fn_2;
     m_dNextSendTime = 0;
 }
 
@@ -33,8 +33,9 @@ void SpeedCtrl::SendPacket(pcap_pkthdr* pHeader, const unsigned char* pData){
     while (dArrivalTime > m_dNextSendTime){
         boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     }
-    m_unCurSentByte = m_unCurSentByte + pHeader->len;
-    m_fOutputCallback(pHeader, pData, m_unPreSentByte.load());
+    m_dPktArrivalTime = dArrivalTime;
+    m_unSentByte = m_unSentByte + pHeader->len;
+    m_fn_1(pHeader, pData);
 }
 
 void SpeedCtrl::SpeedFactorTimerCallback(){
@@ -44,6 +45,6 @@ void SpeedCtrl::SpeedFactorTimerCallback(){
 }
 
 void SpeedCtrl::OneSecTimerCallback(){
-    m_unPreSentByte = m_unCurSentByte.load();
-    m_unCurSentByte = 0;
+    m_fn_2(m_unSentByte, m_dPktArrivalTime);
+    m_unSentByte = 0;
 }

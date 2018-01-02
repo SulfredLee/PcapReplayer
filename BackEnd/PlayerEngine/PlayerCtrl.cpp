@@ -12,7 +12,6 @@ PlayerCtrl::PlayerCtrl()
 
     m_bPause = false;
     m_nPreProgress = -1;
-    m_unPreSentByte = 0;
 
     LOGMSG_INFO("OUT");
 }
@@ -37,7 +36,8 @@ void PlayerCtrl::InitComponent(const PlayerCtrlComponent& InCompo){
 
     // handle Replay pipe line
     m_PcapReader.InitComponent(boost::bind(&PlayerCtrl::Process_PcapReader, this, _1, _2, _3));
-    m_SpeedCtrl.InitComponent(boost::bind(&PlayerCtrl::Process_SpeedCtrl, this, _1, _2, _3),
+    m_SpeedCtrl.InitComponent(boost::bind(&PlayerCtrl::Process_SpeedCtrl_1, this, _1, _2),
+                              boost::bind(&PlayerCtrl::Process_SpeedCtrl_2, this, _1, _2),
                               m_Compo.pConfig);
     LOGMSG_INFO("OUT");
 }
@@ -116,20 +116,15 @@ void PlayerCtrl::Process_PcapReader(pcap_pkthdr* pHeader, const unsigned char* p
     m_SpeedCtrl.SendPacket(pHeader, pData);
 }
 
-void PlayerCtrl::Process_SpeedCtrl(pcap_pkthdr* pHeader, const unsigned char* pData, unsigned int unSentByte){
+void PlayerCtrl::Process_SpeedCtrl_1(pcap_pkthdr* pHeader, const unsigned char* pData){
     m_PcapSender.SendPacket(pHeader, pData);
-    if (m_unPreSentByte != unSentByte){ // if we need to update UI
-        // handle current sent byte
-        m_unPreSentByte = unSentByte;
-        // handle current packet time
-        long lPacketArrivalSec = pHeader->ts.tv_sec;
-        long lPacketArrivalmicroseconds = pHeader->ts.tv_usec;
-        double dCurPktTime = lPacketArrivalSec + lPacketArrivalmicroseconds*0.000001;
-        // handle UI update
-        emit m_Compo.pMainWindow->onStatusBar_SentByte_FromPlayerCtrl(unSentByte);
-        emit m_Compo.pMainWindow->onStatusBar_CurPktTime_FromPlayerCtrl(dCurPktTime);
-        emit m_Compo.pMainWindow->onStatusBar_Invalidate_FromPlayerCtrl();
-    }
+}
+
+void PlayerCtrl::Process_SpeedCtrl_2(unsigned int unSentByte, double dPktTime){
+    // handle UI update
+    emit m_Compo.pMainWindow->onStatusBar_SentByte_FromPlayerCtrl(unSentByte);
+    emit m_Compo.pMainWindow->onStatusBar_CurPktTime_FromPlayerCtrl(dPktTime);
+    emit m_Compo.pMainWindow->onStatusBar_Invalidate_FromPlayerCtrl();
 }
 
 void PlayerCtrl::Process_PcapSender(pcap_pkthdr* pHeader, const unsigned char* pData){
