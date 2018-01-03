@@ -35,7 +35,8 @@ void PlayerCtrl::InitComponent(const PlayerCtrlComponent& InCompo){
     LOGMSG_INFO("IN");
     m_Compo = InCompo;
     // handle Replay pipe line
-    m_PcapReader.InitComponent(boost::bind(&PlayerCtrl::Process_PcapReader, this, _1, _2, _3));
+    m_PcapReader.InitComponent(boost::bind(&PlayerCtrl::Process_PcapReader, this, _1, _2, _3)
+                               , m_Compo.pConfig);
     m_SpeedCtrl.InitComponent(boost::bind(&PlayerCtrl::Process_SpeedCtrl_1, this, _1, _2),
                               boost::bind(&PlayerCtrl::Process_SpeedCtrl_2, this, _1, _2),
                               m_Compo.pConfig);

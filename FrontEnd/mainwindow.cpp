@@ -62,6 +62,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lineEdit_SpeedLimit->insert("-1.0");
     ui->lineEdit_LoopCount->insert("-1");
 
+    // handle tableWidget
+    ui->tableWidget_NetMapDst->clear();
+    ui->tableWidget_NetMapDst->setColumnCount(2);
+    ui->tableWidget_NetMapDst->setHorizontalHeaderItem(0, new QTableWidgetItem(QString("Original Dst IP")));
+    ui->tableWidget_NetMapDst->setHorizontalHeaderItem(1, new QTableWidgetItem(QString("Converted Dst IP")));
+    ui->tableWidget_NetMapDst->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    ui->tableWidget_NetMapSrc->clear();
+    ui->tableWidget_NetMapSrc->setColumnCount(2);
+    ui->tableWidget_NetMapSrc->setHorizontalHeaderItem(0, new QTableWidgetItem(QString("Original Src IP")));
+    ui->tableWidget_NetMapSrc->setHorizontalHeaderItem(1, new QTableWidgetItem(QString("Converted Src IP")));
+    ui->tableWidget_NetMapSrc->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
     LOGMSG_INFO("OUT");
 }
 
@@ -252,6 +265,19 @@ void MainWindow::GetBitPerSec(double bit, QString& line, int step){
         GetBitPerSec(bit / 1000, line, step + 1);
 }
 
+QMap<QString, QString> MainWindow::GetMapFromNetworkTable(QTableWidget const * inTable){
+    QMap<QString, QString> mapTemp;
+    for (int nRow = 0; nRow < inTable->rowCount(); nRow++)
+        {
+            QTableWidgetItem * itemOriginal = inTable->item(nRow, 0);
+            QTableWidgetItem * itemConverted = inTable->item(nRow, 1);
+            QString strOriginalIP = itemOriginal->text();
+            QString strConvertedIP = itemConverted->text();
+            mapTemp.insert(strOriginalIP, strConvertedIP);
+        }
+    return mapTemp;
+}
+
 std::string MainWindow::ConvertQString2String(const QString& qstr){
 #ifdef WINDOWS
     return qstr.toLocal8Bit().constData(); // we get the current locale for the current system
@@ -307,6 +333,17 @@ QString MainWindow::ConvertTime2QString(double dTime){
 #endif
 
     return QString(buf);
+}
+
+std::map<std::string, std::string> MainWindow::ConvertQMap2StdMap(const QMap<QString, QString>& inMap){
+    std::map<std::string, std::string> outMap;
+    for (QMap<QString, QString>::const_iterator it = inMap.begin();
+         it != inMap.end(); it++)        {
+        std::string strKey = it.key().toUtf8().constData();
+        std::string strValue = it.value().toUtf8().constData();
+        outMap.insert(std::make_pair(strKey, strValue));
+    }
+    return outMap;
 }
 
 void MainWindow::onOpen_File(){
@@ -409,6 +446,8 @@ void MainWindow::onPlay(){
     m_Compo.pConfig->SetSpeedFactor(ui->lineEdit_SpeedFactor->text().toDouble());
     m_Compo.pConfig->SetSpeedLimit(ui->lineEdit_SpeedLimit->text().toDouble() * 1000 * 1000);
     m_Compo.pConfig->SetLoopCount(ui->lineEdit_LoopCount->text().toInt());
+    m_Compo.pConfig->SetMapDstIP(ConvertQMap2StdMap(GetMapFromNetworkTable(ui->tableWidget_NetMapDst)));
+    m_Compo.pConfig->SetMapSrcIP(ConvertQMap2StdMap(GetMapFromNetworkTable(ui->tableWidget_NetMapSrc)));
 
     // handle Ctrl
     auto p = boost::make_shared<PlayerMsg>();
@@ -485,37 +524,39 @@ void MainWindow::onRegularPaly(){
 
 void MainWindow::onAddSrcMap(){
     LOGMSG_INFO("IN");
-    QMessageBox TestingBox;
-    TestingBox.setWindowTitle(QString("Wait for input!"));
-    TestingBox.show();
-    TestingBox.exec();
+    ui->tableWidget_NetMapSrc->insertRow(ui->tableWidget_NetMapSrc->rowCount());
     LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onAddDstMap(){
     LOGMSG_INFO("IN");
-    QMessageBox TestingBox;
-    TestingBox.setWindowTitle(QString("Wait for input!"));
-    TestingBox.show();
-    TestingBox.exec();
+    ui->tableWidget_NetMapDst->insertRow(ui->tableWidget_NetMapDst->rowCount());
     LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onRemoveScrMapIP(){
     LOGMSG_INFO("IN");
-    QMessageBox TestingBox;
-    TestingBox.setWindowTitle(QString("Wait for input!"));
-    TestingBox.show();
-    TestingBox.exec();
+    int nCurRow = ui->tableWidget_NetMapSrc->currentRow();
+    if (nCurRow == -1) {
+        return;
+    }
+    ui->tableWidget_NetMapSrc->removeRow(nCurRow);
+
+//  QMessageBox TestingBox;
+//  TestingBox.setWindowTitle(QString("Wait for input!"));
+//  TestingBox.show();
+//  TestingBox.exec();
     LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onRemoveDstMapIP(){
     LOGMSG_INFO("IN");
-    QMessageBox TestingBox;
-    TestingBox.setWindowTitle(QString("Wait for input!"));
-    TestingBox.show();
-    TestingBox.exec();
+    int nCurRow = ui->tableWidget_NetMapDst->currentRow();
+    if (nCurRow == -1) {
+        return;
+    }
+    ui->tableWidget_NetMapDst->removeRow(nCurRow);
+
     LOGMSG_INFO("OUT");
 }
 

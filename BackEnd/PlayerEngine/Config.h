@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <map>
 
 #include "Common.h"
 #include "AdapterInfo.h"
@@ -40,14 +41,22 @@ public:
     // handle Loop
     void SetLoopCount(const int& nLoopCount);
     int GetLoopCount();
+
+    // handle SrcIP DstIP mapping
+    void SetMapDstIP(const std::map<std::string, std::string>& inMap);
+    void SetMapSrcIP(const std::map<std::string, std::string>& inMap);
+    std::map<std::string, std::string> GetMapDstIP();
+    std::map<std::string, std::string> GetMapSrcIP();
 private:
     std::vector<std::string> m_PcapFiles;
     std::string m_strLatestFilePath;
     PlayerStatus m_PlayerStatus;
     AdapterInfo m_AdapterInfo;
     int m_nAdapterIdx; // indicating user selected adapter index
+    int m_nLoopCount;
     double m_dSpeedFactor;
     double m_dSpeedLimit; // MBit/s
-    int m_nLoopCount;
+    std::map<std::string, std::string> m_mapDstIP;
+    std::map<std::string, std::string> m_mapSrcIP;
 };
 #endif

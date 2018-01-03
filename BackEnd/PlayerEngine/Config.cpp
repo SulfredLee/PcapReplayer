@@ -108,3 +108,19 @@ void Config::SetLoopCount(const int& nLoopCount){
 int Config::GetLoopCount(){
     return m_nLoopCount;
 }
+
+void Config::SetMapDstIP(const std::map<std::string, std::string>& inMap){
+    m_mapDstIP = inMap;
+}
+
+void Config::SetMapSrcIP(const std::map<std::string, std::string>& inMap){
+    m_mapSrcIP = inMap;
+}
+
+std::map<std::string, std::string> Config::GetMapDstIP(){
+    return m_mapDstIP;
+}
+
+std::map<std::string, std::string> Config::GetMapSrcIP(){
+    return m_mapSrcIP;
+}

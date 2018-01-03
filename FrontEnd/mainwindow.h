@@ -5,10 +5,12 @@
 #include <QFileDialog>
 #include <QDirIterator>
 #include <QMessageBox>
+#include <QtWidgets/QTableWidget>
 
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "MsgQ.h"
 #include "Common.h"
@@ -39,6 +41,7 @@ public:
 private:
     void AddPcapFilesToUI(const QStringList& INFiles);
     void GetBitPerSec(double bit, QString& line, int step);
+    QMap<QString, QString> GetMapFromNetworkTable(QTableWidget const * inTable);
 private: // local utils
     std::string ConvertQString2String(const QString& qstr);
     QString ConvertString2QString(const std::string& str);
@@ -46,6 +49,7 @@ private: // local utils
     QStringList ConvertVectorString(const std::vector<std::string>& vecStr);
     bool IsFileExists(const QString& qstrPath);
     QString ConvertTime2QString(double dTime);
+    std::map<std::string, std::string> ConvertQMap2StdMap(const QMap<QString, QString>& inMap);
 private:
     Ui::MainWindow *ui;
 
