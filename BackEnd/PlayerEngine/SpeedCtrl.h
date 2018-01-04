@@ -21,7 +21,7 @@ public:
     ~SpeedCtrl();
 
     void InitComponent(boost::function<void (pcap_pkthdr*, const unsigned char*)> fn_1,
-                       boost::function<void (unsigned int, double)> fn_2,
+                       boost::function<void (unsigned int, double, double)> fn_2,
                        Config* pConfig);
     void SendPacket(pcap_pkthdr* pHeader, const unsigned char* pData);
     void Reset();
@@ -30,7 +30,7 @@ private:
     void OneSecTimerCallback();
 private:
     boost::function<void (pcap_pkthdr* pHeader, const unsigned char* pData)> m_fn_1;
-    boost::function<void (unsigned int unSentByte, double dPktTime)> m_fn_2;
+    boost::function<void (unsigned int unSentByte, double dPktTime, double dSendTimeDiff)> m_fn_2;
     Config* m_pConfig;
     MSecTimer m_SpeedFactorTimer;
     MSecTimer m_OneSecTimer;
@@ -39,6 +39,7 @@ private:
     boost::atomic<unsigned int> m_unSentByte; // sent bit within one second
     double m_dSpeedLimit;
     double m_dSpeedFactor;
+    double m_dSendTimeDiff; // time left to send next package
 };
 
 #endif

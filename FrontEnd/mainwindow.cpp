@@ -47,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(onStatusBar_SentByte_FromPlayerCtrl(int)), this, SLOT(onStatusBar_SentByte(int)));
     connect(this, SIGNAL(onStatusBar_CurPktTime_FromPlayerCtrl(double)), this, SLOT(onStatusBar_CurPktTime(double)));
     connect(this, SIGNAL(onStatusBar_RemainLoopCount_FromPlayerCtrl(int)), this, SLOT(onStatusBar_RemainLoopCount(int)));
+    connect(this, SIGNAL(onStatusBar_SendTimeDiff_FromPlayerCtrl(double)), this, SLOT(onStatusBar_SendTimeDiff(double)));
     connect(this, SIGNAL(onStatusBar_Invalidate_FromPlayerCtrl()), this, SLOT(onStatusBar_Invalidate()));
 
     m_qstrCurAppPath = QDir::currentPath();
@@ -61,7 +62,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lineEdit_SpeedFactor->insert("1.0");
     ui->lineEdit_SpeedLimit->insert("-1.0");
     ui->lineEdit_LoopCount->insert("-1");
-    m_qstrRemainLoopCount = "Remain Loop: -1";
+    m_qstrRemainLoopCount = "Remain Loop: 0";
 
     // handle tableWidget
     ui->tableWidget_NetMapDst->clear();
@@ -579,11 +580,23 @@ void MainWindow::onStatusBar_CurPktTime(double dCurPktTime){
 }
 
 void MainWindow::onStatusBar_RemainLoopCount(int nRemainLoopCount){
-    m_qstrRemainLoopCount = "Remain Loop: " + QString::number(nRemainLoopCount);
+    if (nRemainLoopCount < 0) {
+        m_qstrRemainLoopCount = "Remain Loop: 0";
+    }else{
+        m_qstrRemainLoopCount = "Remain Loop: " + QString::number(nRemainLoopCount);
+    }
+}
+
+void MainWindow::onStatusBar_SendTimeDiff(double dSendTimeDiff){
+    if (dSendTimeDiff < 1) {
+        m_qstrSendTimeDiff = "Next package: 0 sec";
+    }else{
+        m_qstrSendTimeDiff = "Next package: " + QString::number(dSendTimeDiff) + " sec";
+    }
 }
 
 void MainWindow::onStatusBar_Invalidate(){
     QString qstrTempLine;
-    qstrTempLine = m_qstrRemainLoopCount + "    " + m_qstrSentByte + "    " + m_qstrCurPktTime;
+    qstrTempLine = m_qstrSendTimeDiff + "    " + m_qstrRemainLoopCount + "    " + m_qstrSentByte + "    " + m_qstrCurPktTime;
     ui->statusbar->showMessage(qstrTempLine);
 }

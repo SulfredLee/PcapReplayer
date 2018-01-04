@@ -38,7 +38,7 @@ void PlayerCtrl::InitComponent(const PlayerCtrlComponent& InCompo){
     m_PcapReader.InitComponent(boost::bind(&PlayerCtrl::Process_PcapReader, this, _1, _2, _3)
                                , m_Compo.pConfig);
     m_SpeedCtrl.InitComponent(boost::bind(&PlayerCtrl::Process_SpeedCtrl_1, this, _1, _2),
-                              boost::bind(&PlayerCtrl::Process_SpeedCtrl_2, this, _1, _2),
+                              boost::bind(&PlayerCtrl::Process_SpeedCtrl_2, this, _1, _2, _3),
                               m_Compo.pConfig);
     m_PcapSender.InitComponent(boost::bind(&PlayerCtrl::Process_PcapSender, this, _1, _2),
                                m_Compo.pConfig);
@@ -134,10 +134,11 @@ void PlayerCtrl::Process_SpeedCtrl_1(pcap_pkthdr* pHeader, const unsigned char* 
     m_PcapSender.SendPacket(pHeader, pData);
 }
 
-void PlayerCtrl::Process_SpeedCtrl_2(unsigned int unSentByte, double dPktTime){
+void PlayerCtrl::Process_SpeedCtrl_2(unsigned int unSentByte, double dPktTime, double dSendTimeDiff){
     // handle UI update
     emit m_Compo.pMainWindow->onStatusBar_SentByte_FromPlayerCtrl(unSentByte);
     emit m_Compo.pMainWindow->onStatusBar_CurPktTime_FromPlayerCtrl(dPktTime);
+    emit m_Compo.pMainWindow->onStatusBar_SendTimeDiff_FromPlayerCtrl(dSendTimeDiff);
     emit m_Compo.pMainWindow->onStatusBar_Invalidate_FromPlayerCtrl();
 }
 

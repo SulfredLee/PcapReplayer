@@ -57,6 +57,7 @@ private:
     QString m_qstrSentByte;
     QString m_qstrCurPktTime;
     QString m_qstrRemainLoopCount;
+    QString m_qstrSendTimeDiff;
     MainWindowComponent m_Compo;
 signals:
     void onPlay_FromPlayerCtrl();
@@ -66,6 +67,7 @@ signals:
     void onStatusBar_SentByte_FromPlayerCtrl(int);
     void onStatusBar_CurPktTime_FromPlayerCtrl(double);
     void onStatusBar_RemainLoopCount_FromPlayerCtrl(int);
+    void onStatusBar_SendTimeDiff_FromPlayerCtrl(double);
     void onStatusBar_Invalidate_FromPlayerCtrl();
 private slots:
     // handle menu and tool bar
@@ -92,6 +94,7 @@ private slots:
     void onStatusBar_SentByte(int);
     void onStatusBar_CurPktTime(double);
     void onStatusBar_RemainLoopCount(int);
+    void onStatusBar_SendTimeDiff(double);
     void onStatusBar_Invalidate();
 };
 

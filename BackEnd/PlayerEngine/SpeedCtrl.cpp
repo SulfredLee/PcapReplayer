@@ -8,13 +8,14 @@ SpeedCtrl::SpeedCtrl()
     m_dNextSendTime = 0;
     m_dPktArrivalTime = 0;
     m_unSentByte = 0;
+    m_dSendTimeDiff = 0;
 }
 
 SpeedCtrl::~SpeedCtrl(){
 }
 
 void SpeedCtrl::InitComponent(boost::function<void (pcap_pkthdr*, const unsigned char*)> fn_1,
-                              boost::function<void (unsigned int, double)> fn_2,
+                              boost::function<void (unsigned int, double, double)> fn_2,
                               Config* pConfig){
     m_pConfig = pConfig;
     m_fn_1 = fn_1;
@@ -31,6 +32,7 @@ void SpeedCtrl::SendPacket(pcap_pkthdr* pHeader, const unsigned char* pData){
         m_dNextSendTime = dArrivalTime;
     }
     while (dArrivalTime > m_dNextSendTime){//Speed factor block
+        m_dSendTimeDiff = dArrivalTime - m_dNextSendTime;
         boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     }
     while (m_dSpeedLimit > 0 && m_unSentByte * 8 > m_dSpeedLimit){//Speed limit block
@@ -44,6 +46,7 @@ void SpeedCtrl::SendPacket(pcap_pkthdr* pHeader, const unsigned char* pData){
 void SpeedCtrl::Reset(){
     m_dNextSendTime = 0;
     m_dPktArrivalTime = 0;
+    m_dSendTimeDiff = 0;
     m_dSpeedFactor = m_pConfig->GetSpeedFactor();
     m_dSpeedLimit = m_pConfig->GetSpeedLimit();
 }
@@ -55,6 +58,6 @@ void SpeedCtrl::SpeedFactorTimerCallback(){
 }
 
 void SpeedCtrl::OneSecTimerCallback(){
-    m_fn_2(m_unSentByte, m_dPktArrivalTime);
+    m_fn_2(m_unSentByte, m_dPktArrivalTime, m_dSendTimeDiff);
     m_unSentByte = 0;
 }

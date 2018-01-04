@@ -40,7 +40,7 @@ private:
     void ProcessPlay();
     void Process_PcapReader(pcap_pkthdr* pHeader, const unsigned char* pData, int nProgress);
     void Process_SpeedCtrl_1(pcap_pkthdr* pHeader, const unsigned char* pData);
-    void Process_SpeedCtrl_2(unsigned int unSentByte, double dPktTime);
+    void Process_SpeedCtrl_2(unsigned int unSentByte, double dPktTime, double dSendTimeDiff);
     void Process_PcapSender(pcap_pkthdr* pHeader, const unsigned char* pData);
     void MsgQMain();
     void ReplayMain();
