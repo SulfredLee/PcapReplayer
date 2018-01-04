@@ -61,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lineEdit_SpeedFactor->insert("1.0");
     ui->lineEdit_SpeedLimit->insert("-1.0");
     ui->lineEdit_LoopCount->insert("-1");
+    m_qstrRemainLoopCount = "Remain Loop: -1";
 
     // handle tableWidget
     ui->tableWidget_NetMapDst->clear();
