@@ -16,6 +16,8 @@ void PcapReader::InitComponent(boost::function<void (pcap_pkthdr*, const unsigne
                                , Config* pConfig){
     m_fOutputCallback = f;
     m_pConfig = pConfig;
+
+    Reset();
 }
 
 void PcapReader::ReadFile(const std::string& strPcapFile){
@@ -48,17 +50,17 @@ void PcapReader::ReadFile(const std::string& strPcapFile){
         memcpy(pMyData, data, header->len);
         std::string strDstIP = getDstIPFromPcapPkt(data);
         std::string strSrcIP = getSrcIPFromPcapPkt(data);
-        auto DstIT = m_pConfig->GetMapDstIP().find(strDstIP);
-        auto SrcIT = m_pConfig->GetMapSrcIP().find(strSrcIP);
-        if (DstIT != m_pConfig->GetMapDstIP().end()) {
+        auto DstIT = m_mapDstIP.find(strDstIP);
+        auto SrcIT = m_mapSrcIP.find(strSrcIP);
+        if (DstIT != m_mapDstIP.end()) {
             UpdateDstIP(pMyData, DstIT->second);
         }
-        if (SrcIT != m_pConfig->GetMapSrcIP().end()) {
+        if (SrcIT != m_mapSrcIP.end()) {
             UpdateScrIP(pMyData, SrcIT->second);
         }
         // handle checksum
-        if (DstIT != m_pConfig->GetMapDstIP().end()
-            || SrcIT != m_pConfig->GetMapSrcIP().end()){
+        if (DstIT != m_mapDstIP.end()
+            || SrcIT != m_mapSrcIP.end()){
             ReCalculateCheckSum_IPHeader(pMyData);
             ReCalculateCheckSum_UDP_Pkt(pMyData, header->len);
         }
@@ -78,6 +80,11 @@ void PcapReader::ReadFile(const std::string& strPcapFile){
     ssTempLine.str(std::string());
     ssTempLine << "Finished reading: " << strPcapFile;
     LOGMSG_INFO(ssTempLine.str());
+}
+
+void PcapReader::Reset(){
+    m_mapDstIP = m_pConfig->GetMapDstIP();
+    m_mapSrcIP = m_pConfig->GetMapSrcIP();
 }
 
 std::string PcapReader::getDstIPFromPcapPkt(const u_char *& data){

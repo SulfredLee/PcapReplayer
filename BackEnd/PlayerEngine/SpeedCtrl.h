@@ -37,6 +37,8 @@ private:
     boost::atomic<double> m_dNextSendTime; // unit in second
     boost::atomic<double> m_dPktArrivalTime; // unit in second
     boost::atomic<unsigned int> m_unSentByte; // sent bit within one second
+    double m_dSpeedLimit;
+    double m_dSpeedFactor;
 };
 
 #endif

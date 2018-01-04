@@ -95,6 +95,7 @@ void PlayerCtrl::ProcessPlay(){
         m_Compo.pConfig->SetPlayerStatus(PlayerStatus::Play);
         m_bPause = false;
 
+        m_PcapReader.Reset();
         m_SpeedCtrl.Reset();
         m_nLoopCount = m_Compo.pConfig->GetLoopCount();
         emit m_Compo.pMainWindow->onStatusBar_RemainLoopCount_FromPlayerCtrl(m_nLoopCount - 1);

@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define DONFIG_H
 
+#include <boost/thread/mutex.hpp>
+
 #include <vector>
 #include <string>
 #include <sstream>
@@ -13,6 +15,8 @@ class Config{
 public:
     Config();
     ~Config();
+
+    Config(const Config& that) = delete;
 
     // handle PcapFiles
     void AddPcapFiles(const std::vector<std::string>& PcapFiles);
@@ -58,5 +62,6 @@ private:
     double m_dSpeedLimit; // MBit/s
     std::map<std::string, std::string> m_mapDstIP;
     std::map<std::string, std::string> m_mapSrcIP;
+    boost::mutex m_MuData;
 };
 #endif

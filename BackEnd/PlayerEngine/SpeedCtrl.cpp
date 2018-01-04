@@ -33,7 +33,7 @@ void SpeedCtrl::SendPacket(pcap_pkthdr* pHeader, const unsigned char* pData){
     while (dArrivalTime > m_dNextSendTime){//Speed factor block
         boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     }
-    while (m_pConfig->GetSpeedLimit() > 0 && m_unSentByte * 8 > m_pConfig->GetSpeedLimit()){//Speed limit block
+    while (m_dSpeedLimit > 0 && m_unSentByte * 8 > m_dSpeedLimit){//Speed limit block
         boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     }
     m_dPktArrivalTime = dArrivalTime;
@@ -44,11 +44,13 @@ void SpeedCtrl::SendPacket(pcap_pkthdr* pHeader, const unsigned char* pData){
 void SpeedCtrl::Reset(){
     m_dNextSendTime = 0;
     m_dPktArrivalTime = 0;
+    m_dSpeedFactor = m_pConfig->GetSpeedFactor();
+    m_dSpeedLimit = m_pConfig->GetSpeedLimit();
 }
 
 void SpeedCtrl::SpeedFactorTimerCallback(){
     if (m_dNextSendTime != 0){
-        m_dNextSendTime = m_dNextSendTime + (0.1 * m_pConfig->GetSpeedFactor());
+        m_dNextSendTime = m_dNextSendTime + (0.1 * m_dSpeedFactor);
     }
 }
 
