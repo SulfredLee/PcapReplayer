@@ -7,9 +7,10 @@
 #include <sstream>
 #include <stdio.h>
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow){
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+    , m_Schedulerdialog(this){
     ui->setupUi(this);
 
     LOGMSG_INFO("IN");
@@ -426,10 +427,9 @@ void MainWindow::onLoad_Config(){
 
 void MainWindow::onScheduler(){
     LOGMSG_INFO("IN");
-    QMessageBox TestingBox;
-    TestingBox.setWindowTitle(QString("Wait for input!"));
-    TestingBox.show();
-    TestingBox.exec();
+    m_Schedulerdialog.setModal(true);
+    m_Schedulerdialog.show();
+    m_Schedulerdialog.exec();
     LOGMSG_INFO("OUT");
 }
 

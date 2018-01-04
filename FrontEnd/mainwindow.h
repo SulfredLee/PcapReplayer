@@ -14,6 +14,7 @@
 
 #include "MsgQ.h"
 #include "Common.h"
+#include "schedulerdialog.h"
 
 class Config;
 
@@ -59,6 +60,7 @@ private:
     QString m_qstrRemainLoopCount;
     QString m_qstrSendTimeDiff;
     MainWindowComponent m_Compo;
+    SchedulerDialog m_Schedulerdialog;
 signals:
     void onPlay_FromPlayerCtrl();
     void onPause_FromPlayerCtrl();
