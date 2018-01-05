@@ -428,6 +428,7 @@ void MainWindow::onLoad_Config(){
 void MainWindow::onScheduler(){
     LOGMSG_INFO("IN");
     m_Schedulerdialog.setModal(true);
+    m_Schedulerdialog.InitComponent(m_Compo.pConfig);
     m_Schedulerdialog.show();
     m_Schedulerdialog.exec();
     LOGMSG_INFO("OUT");

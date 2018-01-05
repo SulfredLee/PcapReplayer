@@ -6,6 +6,7 @@ Config::Config(){
     m_PlayerStatus = PlayerStatus::Stop;
     m_nAdapterIdx = 0;
     m_dSpeedFactor = 1;
+    m_vecSchedulerDay.resize(7, false);
     LOGMSG_INFO("OUT");
 }
 
@@ -147,4 +148,46 @@ std::map<std::string, std::string> Config::GetMapSrcIP(){
     boost::lock_guard<boost::mutex> lock(m_MuData);
     //    boost::mutex::scoped_lock lock(m_MuData);
     return m_mapSrcIP;
+}
+
+void Config::SetSchedulerEnable(const bool& bState){
+    boost::lock_guard<boost::mutex> lock(m_MuData);
+    m_bSchedulerEnable = bState;
+}
+
+bool Config::GetSchedulerEnable(){
+    boost::lock_guard<boost::mutex> lock(m_MuData);
+    return m_bSchedulerEnable;
+}
+
+void Config::SetOneTimeOnly(const bool& bIN){
+    boost::lock_guard<boost::mutex> lock(m_MuData);
+    m_bOneTimeOnly = bIN;
+}
+
+bool Config::GetOneTimeOnly(){
+    boost::lock_guard<boost::mutex> lock(m_MuData);
+    return m_bOneTimeOnly;
+}
+
+void Config::SetSchedulerDay(const bool& bMon
+                             , const bool& bTue
+                             , const bool& bWed
+                             , const bool& bThru
+                             , const bool& bFri
+                             , const bool& bSat
+                             , const bool& bSun){
+    boost::lock_guard<boost::mutex> lock(m_MuData);
+    m_vecSchedulerDay[0] = bMon;
+    m_vecSchedulerDay[1] = bTue;
+    m_vecSchedulerDay[2] = bWed;
+    m_vecSchedulerDay[3] = bThru;
+    m_vecSchedulerDay[4] = bFri;
+    m_vecSchedulerDay[5] = bSat;
+    m_vecSchedulerDay[6] = bSun;
+}
+
+std::vector<bool> Config::GetSchedulerDay(){
+    boost::lock_guard<boost::mutex> lock(m_MuData);
+    return m_vecSchedulerDay;
 }

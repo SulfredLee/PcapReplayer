@@ -51,6 +51,20 @@ public:
     void SetMapSrcIP(const std::map<std::string, std::string>& inMap);
     std::map<std::string, std::string> GetMapDstIP();
     std::map<std::string, std::string> GetMapSrcIP();
+
+    // handle Scheduler
+    void SetSchedulerEnable(const bool& bState);
+    bool GetSchedulerEnable();
+    void SetOneTimeOnly(const bool& bIN);
+    bool GetOneTimeOnly();
+    void SetSchedulerDay(const bool& bMon
+                         , const bool& bTue
+                         , const bool& bWed
+                         , const bool& bThru
+                         , const bool& bFri
+                         , const bool& bSat
+                         , const bool& bSun);
+    std::vector<bool> GetSchedulerDay();
 private:
     std::vector<std::string> m_PcapFiles;
     std::string m_strLatestFilePath;
@@ -63,5 +77,9 @@ private:
     std::map<std::string, std::string> m_mapDstIP;
     std::map<std::string, std::string> m_mapSrcIP;
     boost::mutex m_MuData;
+    // handle Scheduler
+    bool m_bSchedulerEnable;
+    bool m_bOneTimeOnly;
+    std::vector<bool> m_vecSchedulerDay;
 };
 #endif
