@@ -16,7 +16,8 @@ find_package(Boost REQUIRED
 	log_setup
 	chrono
 	regex
-  thread)
+  thread
+  serialization)
 
 message(STATUS "Backend - Boost library status:")
 message(STATUS "Backend -     version: ${BoosT_VERSION}")

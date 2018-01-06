@@ -106,6 +106,10 @@ void MainWindow::InitComponent(const MainWindowComponent& InCompo){
         ui->comboBox_InterfaceList->addItem(ConvertString2QString(vecTemp[i]));
         ui->comboBox_InterfaceList->setCurrentIndex(0);
     }
+
+    AddPcapFilesToUI(ConvertVectorString(m_Compo.pConfig->GetPcapFiles()));
+    AddIPMapToUI(ConvertStdMap2QMap(m_Compo.pConfig->GetMapSrcIP())
+                 , ConvertStdMap2QMap(m_Compo.pConfig->GetMapDstIP()));
     LOGMSG_INFO("OUT");
 }
 
@@ -247,6 +251,24 @@ void MainWindow::AddPcapFilesToUI(const QStringList& INFiles){
     LOGMSG_INFO("OUT");
 }
 
+void MainWindow::AddIPMapToUI(const QMap<QString, QString>& SrcMap
+                              , const QMap<QString, QString>& DstMap){
+    int nRow = 0;
+    ui->tableWidget_NetMapSrc->setRowCount(SrcMap.size());
+    for (auto it = SrcMap.begin(); it != SrcMap.end(); it++){
+        ui->tableWidget_NetMapSrc->setItem(nRow, 0, new QTableWidgetItem(it.key()));
+        ui->tableWidget_NetMapSrc->setItem(nRow, 1, new QTableWidgetItem(it.value()));
+        nRow++;
+    }
+    nRow = 0;
+    ui->tableWidget_NetMapDst->setRowCount(DstMap.size());
+    for (auto it = DstMap.begin(); it != DstMap.end(); it++){
+        ui->tableWidget_NetMapDst->setItem(nRow, 0, new QTableWidgetItem(it.key()));
+        ui->tableWidget_NetMapDst->setItem(nRow, 1, new QTableWidgetItem(it.value()));
+        nRow++;
+    }
+}
+
 void MainWindow::GetBitPerSec(double bit, QString& line, int step){
     if (step >= 4)
         return;
@@ -372,6 +394,16 @@ std::map<std::string, std::string> MainWindow::ConvertQMap2StdMap(const QMap<QSt
         std::string strKey = it.key().toUtf8().constData();
         std::string strValue = it.value().toUtf8().constData();
         outMap.insert(std::make_pair(strKey, strValue));
+    }
+    return outMap;
+}
+
+QMap<QString, QString> MainWindow::ConvertStdMap2QMap(const std::map<std::string, std::string>& inMap){
+    QMap<QString, QString> outMap;
+    for (auto it = inMap.begin(); it != inMap.end(); it++){
+        QString qstrKey = ConvertString2QString(it->first);
+        QString qstrValue = ConvertString2QString(it->second);
+        outMap.insert(qstrKey, qstrValue);
     }
     return outMap;
 }

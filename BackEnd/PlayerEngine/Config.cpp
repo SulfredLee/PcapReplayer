@@ -7,6 +7,7 @@ Config::Config(){
     m_nAdapterIdx = 0;
     m_dSpeedFactor = 1;
     m_vecSchedulerDay.resize(7, false);
+    m_strLatestFilePath = "";
     LOGMSG_INFO("OUT");
 }
 

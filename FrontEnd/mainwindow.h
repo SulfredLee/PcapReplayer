@@ -45,6 +45,8 @@ public:
     void SwitchUIStatus_Stop();
 private:
     void AddPcapFilesToUI(const QStringList& INFiles);
+    void AddIPMapToUI(const QMap<QString, QString>& SrcMap
+                      , const QMap<QString, QString>& DstMap);
     void GetBitPerSec(double bit, QString& line, int step);
     QMap<QString, QString> GetMapFromNetworkTable(QTableWidget const * inTable);
 private: // local utils
@@ -55,6 +57,7 @@ private: // local utils
     bool IsFileExists(const QString& qstrPath);
     QString ConvertTime2QString(double dTime);
     std::map<std::string, std::string> ConvertQMap2StdMap(const QMap<QString, QString>& inMap);
+    QMap<QString, QString> ConvertStdMap2QMap(const std::map<std::string, std::string>& inMap);
     void DailyTimerCallback();
 private:
     Ui::MainWindow *ui;

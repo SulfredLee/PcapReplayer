@@ -28,6 +28,8 @@ PlayerCtrl::~PlayerCtrl(){
     m_MsgQ.push(p);
     m_MsgQThread.join();
 
+    Serialization(true);
+
     LOGMSG_INFO("OUT");
 }
 
@@ -42,6 +44,9 @@ void PlayerCtrl::InitComponent(const PlayerCtrlComponent& InCompo){
                               m_Compo.pConfig);
     m_PcapSender.InitComponent(boost::bind(&PlayerCtrl::Process_PcapSender, this, _1, _2),
                                m_Compo.pConfig);
+
+    Serialization(false);
+
     LOGMSG_INFO("OUT");
 }
 
@@ -106,6 +111,7 @@ void PlayerCtrl::ProcessPlay(){
         m_Compo.pConfig->SetPlayerStatus(PlayerStatus::Play);
         m_bPause = false;
 
+        m_PcapReader.Reset();
         m_SpeedCtrl.Reset();
         m_PcapSender.SetAdapter();
         m_nLoopCount = m_Compo.pConfig->GetLoopCount();
@@ -143,6 +149,38 @@ void PlayerCtrl::Process_SpeedCtrl_2(unsigned int unSentByte, double dPktTime, d
 }
 
 void PlayerCtrl::Process_PcapSender(pcap_pkthdr* pHeader, const unsigned char* pData){
+}
+
+void PlayerCtrl::Serialization(const bool& bSave){
+    LOGMSG_INFO("IN");
+    if (bSave) {
+      std::ofstream ofs("default_config.cfg");
+      boost::archive::text_oarchive oa(ofs);
+      oa << m_Compo.pConfig->GetLatestFilePath();
+      oa << m_Compo.pConfig->GetPcapFiles();
+      oa << m_Compo.pConfig->GetMapDstIP();
+      oa << m_Compo.pConfig->GetMapSrcIP();
+    }else{
+      std::ifstream ifs("default_config.cfg");
+      if (!ifs.is_open()) {
+          return;
+      }
+      boost::archive::text_iarchive ia(ifs);
+      std::string strTemp;
+      std::vector<std::string> vecTemp;
+      std::map<std::string, std::string> mapTemp;
+      ia >> strTemp;
+      m_Compo.pConfig->SetLatestFilePath(strTemp);
+      ia >> vecTemp;
+      m_Compo.pConfig->RemoveAllPcapFile();
+      m_Compo.pConfig->AddPcapFiles(vecTemp);
+      ia >> mapTemp;
+      m_Compo.pConfig->SetMapDstIP(mapTemp);
+      mapTemp.clear();
+      ia >> mapTemp;
+      m_Compo.pConfig->SetMapSrcIP(mapTemp);
+    }
+    LOGMSG_INFO("OUT");
 }
 
 void PlayerCtrl::MsgQMain(){
