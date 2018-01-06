@@ -28,16 +28,20 @@ void SpeedCtrl::SendPacket(pcap_pkthdr* pHeader, const unsigned char* pData){
     long lPacketArrivalmicroseconds = pHeader->ts.tv_usec;
     double dArrivalTime = lPacketArrivalSec + lPacketArrivalmicroseconds*0.000001;
 
-    if (m_dNextSendTime == 0){
-        m_dNextSendTime = dArrivalTime;
+    if (m_dSpeedLimit < 0) {// Fix Speed disable
+        if (m_dNextSendTime == 0){
+            m_dNextSendTime = dArrivalTime;
+        }
+        while (dArrivalTime > m_dNextSendTime){//Speed factor block
+            m_dSendTimeDiff = dArrivalTime - m_dNextSendTime;
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+        }
+    }else{// Speed factor disable
+        while (m_dSpeedLimit > 0 && m_unSentByte * 8 > m_dSpeedLimit){//Fix Speed block
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+        }
     }
-    while (dArrivalTime > m_dNextSendTime){//Speed factor block
-        m_dSendTimeDiff = dArrivalTime - m_dNextSendTime;
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-    }
-    while (m_dSpeedLimit > 0 && m_unSentByte * 8 > m_dSpeedLimit){//Speed limit block
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-    }
+
     m_dPktArrivalTime = dArrivalTime;
     m_unSentByte = m_unSentByte + pHeader->len;
     m_fn_1(pHeader, pData);
