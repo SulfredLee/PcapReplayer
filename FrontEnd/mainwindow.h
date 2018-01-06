@@ -12,9 +12,12 @@
 #include <vector>
 #include <map>
 
+#include <boost/date_time.hpp>
+
 #include "MsgQ.h"
 #include "Common.h"
 #include "schedulerdialog.h"
+#include "DailyTimer.h"
 
 class Config;
 
@@ -51,6 +54,7 @@ private: // local utils
     bool IsFileExists(const QString& qstrPath);
     QString ConvertTime2QString(double dTime);
     std::map<std::string, std::string> ConvertQMap2StdMap(const QMap<QString, QString>& inMap);
+    void DailyTimerCallback();
 private:
     Ui::MainWindow *ui;
 
@@ -61,8 +65,10 @@ private:
     QString m_qstrSendTimeDiff;
     MainWindowComponent m_Compo;
     SchedulerDialog m_Schedulerdialog;
+    DailyTimer* m_pDailyTimer;
 signals:
     void onPlay_FromPlayerCtrl();
+    void onPlay_FromMainWindow();
     void onPause_FromPlayerCtrl();
     void onStop_FromPlayerCtrl();
     void onProgressBar_FromPlayerCtrl(int);

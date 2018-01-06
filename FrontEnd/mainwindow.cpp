@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->comboBox_InterfaceList, SIGNAL(activated(int)), this, SLOT(onSelectInterface(int)));
     // handle callback from PlayerCtrl
     connect(this, SIGNAL(onPlay_FromPlayerCtrl()), this, SLOT(onPlay()));
+    connect(this, SIGNAL(onPlay_FromMainWindow()), this, SLOT(onPlay()));
     connect(this, SIGNAL(onPause_FromPlayerCtrl()), this, SLOT(onPause()));
     connect(this, SIGNAL(onStop_FromPlayerCtrl()), this, SLOT(onStop()));
     connect(this, SIGNAL(onProgressBar_FromPlayerCtrl(int)), this, SLOT(onProgressBar(int)));
@@ -78,11 +79,17 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tableWidget_NetMapSrc->setHorizontalHeaderItem(1, new QTableWidgetItem(QString("Converted Src IP")));
     ui->tableWidget_NetMapSrc->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
+    m_pDailyTimer = nullptr;
+
     LOGMSG_INFO("OUT");
 }
 
 MainWindow::~MainWindow(){
     LOGMSG_INFO("IN");
+    if (m_pDailyTimer != nullptr){
+        delete m_pDailyTimer;
+        m_pDailyTimer = nullptr;
+    }
     LOGMSG_INFO("OUT");
     delete ui;
 }
@@ -338,6 +345,26 @@ QString MainWindow::ConvertTime2QString(double dTime){
     return QString(buf);
 }
 
+void MainWindow::DailyTimerCallback(){
+    LOGMSG_INFO("IN");
+    if (m_Compo.pConfig->GetOneTimeOnly()) {
+        emit onPlay_FromMainWindow();
+    }else{
+        std::vector<bool> vecWeek = m_Compo.pConfig->GetSchedulerDay();
+        namespace namePT = boost::posix_time;
+        namePT::ptime now = namePT::second_clock::local_time();
+        if (vecWeek[now.date().day_of_week().as_number()]) { // if today need replay
+            emit onPlay_FromMainWindow();
+        }
+
+        std::stringstream ssTempLine;
+        ssTempLine << now.date().day_of_week()
+                   << " " << now.date().day_of_week().as_number(); // Sunday: 0, Monday: 1, ... , Saturday: 6
+        LOGMSG_INFO(ssTempLine.str());
+    }
+    LOGMSG_INFO("OUT");
+}
+
 std::map<std::string, std::string> MainWindow::ConvertQMap2StdMap(const QMap<QString, QString>& inMap){
     std::map<std::string, std::string> outMap;
     for (QMap<QString, QString>::const_iterator it = inMap.begin();
@@ -431,6 +458,14 @@ void MainWindow::onScheduler(){
     m_Schedulerdialog.InitComponent(m_Compo.pConfig);
     m_Schedulerdialog.show();
     m_Schedulerdialog.exec();
+    if (m_Compo.pConfig->GetSchedulerEnable()) {
+        if (m_pDailyTimer != nullptr){
+            delete m_pDailyTimer;
+            m_pDailyTimer = nullptr;
+        }
+        m_pDailyTimer = new DailyTimer(m_Compo.pConfig->GetDateTime()
+                                      , boost::bind(&MainWindow::DailyTimerCallback, this));
+    }
     LOGMSG_INFO("OUT");
 }
 

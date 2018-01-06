@@ -170,24 +170,34 @@ bool Config::GetOneTimeOnly(){
     return m_bOneTimeOnly;
 }
 
-void Config::SetSchedulerDay(const bool& bMon
+void Config::SetSchedulerDay(const bool& bSun
+                             , const bool& bMon
                              , const bool& bTue
                              , const bool& bWed
                              , const bool& bThru
                              , const bool& bFri
-                             , const bool& bSat
-                             , const bool& bSun){
+                             , const bool& bSat){
     boost::lock_guard<boost::mutex> lock(m_MuData);
-    m_vecSchedulerDay[0] = bMon;
-    m_vecSchedulerDay[1] = bTue;
-    m_vecSchedulerDay[2] = bWed;
-    m_vecSchedulerDay[3] = bThru;
-    m_vecSchedulerDay[4] = bFri;
-    m_vecSchedulerDay[5] = bSat;
-    m_vecSchedulerDay[6] = bSun;
+    m_vecSchedulerDay[0] = bSun;
+    m_vecSchedulerDay[1] = bMon;
+    m_vecSchedulerDay[2] = bTue;
+    m_vecSchedulerDay[3] = bWed;
+    m_vecSchedulerDay[4] = bThru;
+    m_vecSchedulerDay[5] = bFri;
+    m_vecSchedulerDay[6] = bSat;
 }
 
 std::vector<bool> Config::GetSchedulerDay(){
     boost::lock_guard<boost::mutex> lock(m_MuData);
     return m_vecSchedulerDay;
+}
+
+void Config::SetDateTime(const boost::posix_time::ptime& DateTime){
+    boost::lock_guard<boost::mutex> lock(m_MuData);
+    m_DateTime = DateTime;
+}
+
+boost::posix_time::ptime Config::GetDateTime(){
+    boost::lock_guard<boost::mutex> lock(m_MuData);
+    return m_DateTime;
 }

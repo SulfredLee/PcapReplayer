@@ -2,6 +2,7 @@
 #define DONFIG_H
 
 #include <boost/thread/mutex.hpp>
+#include <boost/date_time.hpp>
 
 #include <vector>
 #include <string>
@@ -57,14 +58,16 @@ public:
     bool GetSchedulerEnable();
     void SetOneTimeOnly(const bool& bIN);
     bool GetOneTimeOnly();
-    void SetSchedulerDay(const bool& bMon
+    void SetSchedulerDay(const bool& bSun
+                         , const bool& bMon
                          , const bool& bTue
                          , const bool& bWed
                          , const bool& bThru
                          , const bool& bFri
-                         , const bool& bSat
-                         , const bool& bSun);
+                               , const bool& bSat);
     std::vector<bool> GetSchedulerDay();
+    void SetDateTime(const boost::posix_time::ptime& DateTime);
+    boost::posix_time::ptime GetDateTime();
 private:
     std::vector<std::string> m_PcapFiles;
     std::string m_strLatestFilePath;
@@ -81,5 +84,6 @@ private:
     bool m_bSchedulerEnable;
     bool m_bOneTimeOnly;
     std::vector<bool> m_vecSchedulerDay;
+    boost::posix_time::ptime m_DateTime;
 };
 #endif

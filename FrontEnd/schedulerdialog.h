@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QtCore/QDateTime>
 
+#include <boost/date_time.hpp>
+
 namespace Ui {
 class SchedulerDialog;
 }

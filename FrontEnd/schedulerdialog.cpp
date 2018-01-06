@@ -2,6 +2,7 @@
 #include "ui_schedulerdialog.h"
 
 #include "Config.h"
+#include "LogMgr.h"
 
 SchedulerDialog::SchedulerDialog(QWidget *parent) :
     QDialog(parent),
@@ -53,9 +54,16 @@ void SchedulerDialog::SwitchUIStatus_Init(){
     ui->checkBox_Friday->setEnabled(false);
     ui->checkBox_Saturday->setEnabled(false);
     ui->checkBox_Sunday->setEnabled(false);
+
+    // handle calendarWidget
+    ui->calendarWidget->setEnabled(false);
+
+    // handle timeEdit
+    ui->timeEdit->setEnabled(false);
 }
 
 void SchedulerDialog::SwitchUIStatus_OneTimeOnly(){
+    // handle check box
     ui->checkBox_Monday->setEnabled(false);
     ui->checkBox_Tuesday->setEnabled(false);
     ui->checkBox_Wednesday->setEnabled(false);
@@ -63,9 +71,14 @@ void SchedulerDialog::SwitchUIStatus_OneTimeOnly(){
     ui->checkBox_Friday->setEnabled(false);
     ui->checkBox_Saturday->setEnabled(false);
     ui->checkBox_Sunday->setEnabled(false);
+    // handle calendarWidget
+    ui->calendarWidget->setEnabled(true);
+    // handle timeEdit
+    ui->timeEdit->setEnabled(true);
 }
 
 void SchedulerDialog::SwitchUIStatus_Weekly(){
+    // handle check box
     ui->checkBox_Monday->setEnabled(true);
     ui->checkBox_Tuesday->setEnabled(true);
     ui->checkBox_Wednesday->setEnabled(true);
@@ -73,6 +86,10 @@ void SchedulerDialog::SwitchUIStatus_Weekly(){
     ui->checkBox_Friday->setEnabled(true);
     ui->checkBox_Saturday->setEnabled(true);
     ui->checkBox_Sunday->setEnabled(true);
+    // handle calendarWidget
+    ui->calendarWidget->setEnabled(false);
+    // handle timeEdit
+    ui->timeEdit->setEnabled(true);
 }
 
 void SchedulerDialog::SwitchUIStatus_Enable(const bool& bIN){
@@ -80,16 +97,24 @@ void SchedulerDialog::SwitchUIStatus_Enable(const bool& bIN){
     ui->radioButton_Weekly->setEnabled(bIN);
     ui->radioButton_OneTimeOnly->setEnabled(bIN);
 
-    // handle check box
-    ui->checkBox_Monday->setEnabled(bIN);
-    ui->checkBox_Tuesday->setEnabled(bIN);
-    ui->checkBox_Wednesday->setEnabled(bIN);
-    ui->checkBox_Thursday->setEnabled(bIN);
-    ui->checkBox_Friday->setEnabled(bIN);
-    ui->checkBox_Saturday->setEnabled(bIN);
-    ui->checkBox_Sunday->setEnabled(bIN);
-
-    ui->radioButton_Weekly->isChecked() && bIN ? SwitchUIStatus_Weekly() : SwitchUIStatus_OneTimeOnly();
+    if (bIN && ui->radioButton_Weekly->isChecked()) {
+        SwitchUIStatus_Weekly();
+    }else if (bIN && ui->radioButton_OneTimeOnly->isChecked()) {
+        SwitchUIStatus_OneTimeOnly();
+    }else{
+        // handle check box
+        ui->checkBox_Monday->setEnabled(false);
+        ui->checkBox_Tuesday->setEnabled(false);
+        ui->checkBox_Wednesday->setEnabled(false);
+        ui->checkBox_Thursday->setEnabled(false);
+        ui->checkBox_Friday->setEnabled(false);
+        ui->checkBox_Saturday->setEnabled(false);
+        ui->checkBox_Sunday->setEnabled(false);
+        // handle calendarWidget
+        ui->calendarWidget->setEnabled(false);
+        // handle timeEdit
+        ui->timeEdit->setEnabled(false);
+    }
 }
 
 void SchedulerDialog::onEnable(int nState){
@@ -98,21 +123,66 @@ void SchedulerDialog::onEnable(int nState){
 }
 
 void SchedulerDialog::onConfirm(){
+    LOGMSG_INFO("IN");
     // handle calender widget
     QDate SchedulerDate = ui->calendarWidget->selectedDate();
     // handle timeEdit
     QTime SchedulerTime = ui->timeEdit->time();
+    if (ui->radioButton_OneTimeOnly->isChecked()) {
+        namespace namePT = boost::posix_time;
+        int nYear, nMonth, nDay;
+        SchedulerDate.getDate(&nYear, &nMonth, &nDay);
+        int nHour = SchedulerTime.hour();
+        int nMinute = SchedulerTime.minute();
+        int nSecond = SchedulerTime.second();
+        namePT::ptime pt(boost::gregorian::date(nYear, nMonth, nDay)
+                         , namePT::time_duration(nHour, nMinute, nSecond));
+        m_pConfig->SetDateTime(pt);
+
+        std::stringstream ssTempLine;
+        ssTempLine << nYear << "/"
+                   << nMonth << "/"
+                   << nDay << " "
+                   << nHour << ":"
+                   << nMinute << ":"
+                   << nSecond;
+        LOGMSG_INFO(ssTempLine.str());
+    }else{
+        namespace namePT = boost::posix_time;
+        namePT::ptime now = namePT::second_clock::local_time();
+        int nYear, nMonth, nDay;
+        nYear = now.date().year();
+        nMonth = now.date().month();
+        nDay = now.date().day();
+        int nHour = SchedulerTime.hour();
+        int nMinute = SchedulerTime.minute();
+        int nSecond = SchedulerTime.second();
+        namePT::ptime pt(boost::gregorian::date(nYear, nMonth, nDay)
+                         , namePT::time_duration(nHour, nMinute, nSecond));
+        m_pConfig->SetDateTime(pt);
+
+        std::stringstream ssTempLine;
+        ssTempLine << nYear << "/"
+                   << nMonth << "/"
+                   << nDay << " "
+                   << nHour << ":"
+                   << nMinute << ":"
+                   << nSecond;
+        LOGMSG_INFO(ssTempLine.str());
+    }
     // handle radio box
     m_pConfig->SetOneTimeOnly(ui->radioButton_OneTimeOnly->isChecked());
     // handle check box
     m_pConfig->SetSchedulerEnable(ui->checkBox_Enable->isChecked());
-    m_pConfig->SetSchedulerDay(ui->checkBox_Monday->isChecked()
+    m_pConfig->SetSchedulerDay(ui->checkBox_Sunday->isChecked()
+                               , ui->checkBox_Monday->isChecked()
                                , ui->checkBox_Tuesday->isChecked()
                                , ui->checkBox_Wednesday->isChecked()
                                , ui->checkBox_Thursday->isChecked()
                                , ui->checkBox_Friday->isChecked()
-                               , ui->checkBox_Saturday->isChecked()
-                               , ui->checkBox_Sunday->isChecked());
+                               , ui->checkBox_Saturday->isChecked());
+    LOGMSG_INFO("OUT");
+    close();
 }
 
 void SchedulerDialog::onCancel(){
