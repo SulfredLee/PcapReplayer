@@ -64,7 +64,7 @@ public:
                          , const bool& bWed
                          , const bool& bThru
                          , const bool& bFri
-                               , const bool& bSat);
+                         , const bool& bSat);
     std::vector<bool> GetSchedulerDay();
     void SetDateTime(const boost::posix_time::ptime& DateTime);
     boost::posix_time::ptime GetDateTime();
