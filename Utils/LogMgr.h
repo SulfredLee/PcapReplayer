@@ -43,6 +43,7 @@
 #include <ctime>
 
 #ifdef WINDOWS
+// #include <Windows.h>
 #else
 #include <stdio.h>
 #endif
@@ -194,7 +195,9 @@ namespace Logging
     private:
         unsigned getTickCount(){
 #ifdef WINDOWS
-            return GetTickCount();
+            //return GetTickCount();
+			using namespace std::chrono;
+			return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
 #else
             //auto t = std::chrono::system_clock::now();
             using namespace std::chrono;

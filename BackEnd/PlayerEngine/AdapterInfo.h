@@ -17,7 +17,7 @@ public:
     std::vector<std::string> GetIP();
 private:
 #ifdef WINDOWS
-    std::string GetMacAddress(const std::string& strAdapterName);
+    //std::string GetMacAddress(const std::string& strAdapterName);
 #endif
 private:
     // AdapterName for an example

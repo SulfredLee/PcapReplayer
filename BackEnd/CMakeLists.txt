@@ -9,13 +9,13 @@ message(STATUS "BackEnd - CMAKE_THREAD_LIBS_INIT: ${CMAKE_THREAD_LIBS_INIT}")
 
 # Handle boost libraries
 find_package(Boost REQUIRED
-	log
-	system
-	filesystem
-	date_time
-	log_setup
-	chrono
-	regex
+  log
+  system
+  filesystem
+  date_time
+  log_setup
+  chrono
+  regex
   thread
   serialization)
 
@@ -26,9 +26,9 @@ message(STATUS "Backend -     include path: ${Boost_INCLUDE_DIR}")
 
 # Handle QT libraries
 find_package(Qt5 REQUIRED
-	Core
-	Gui
-	Widgets)
+  Core
+  Gui
+  Widgets)
 message(STATUS "BackEnd - QT library status:")
 message(STATUS "BackEnd -     version: ${Qt5Widgets_VERSION}")
 message(STATUS "BackEnd -     libraries: ${Qt5Widgets_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5Core_QTMAIN_LIBRARIES} ${Qt5Gui_LIBRARIES}")
@@ -69,12 +69,20 @@ if (UNIX)
     optimized ${BackEnd_lib}
     ${CMAKE_THREAD_LIBS_INIT}) # include this package to fix problem 001
 else ()
+  SET(TPN_WIN32_LIB ws2_32.lib)
   file(GLOB BackEnd_lib
     ${PROJECT_BINARY_DIR}/FrontEnd/libFrontEnd.lib
     ${PROJECT_BINARY_DIR}/Utils/libUtils.lib)
   target_link_libraries(PcapReplayer
-    debug ${BackEnd_lib}
-    optimized ${BackEnd_lib})
+    debug ${PROJECT_BINARY_DIR}/FrontEnd/Debug/FrontEnd.lib
+    debug ${PROJECT_BINARY_DIR}/Utils/Debug/Utils.lib
+	debug ${libpcap_LIBRARY_DIR}/x64/Packet.lib
+	debug ${libpcap_LIBRARY_DIR}/x64/wpcap.lib
+	optimized ${PROJECT_BINARY_DIR}/FrontEnd/Release/FrontEnd.lib
+    optimized ${PROJECT_BINARY_DIR}/Utils/Release/Utils.lib
+	optimized ${libpcap_LIBRARY_DIR}/x64/Packet.lib
+	optimized ${libpcap_LIBRARY_DIR}/x64/wpcap.lib
+	${TPN_WIN32_LIB})
 endif()
 target_link_libraries(PcapReplayer
   ${Qt5Core_LIBRARIES}

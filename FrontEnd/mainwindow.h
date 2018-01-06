@@ -19,6 +19,7 @@
 #include "Common.h"
 #include "schedulerdialog.h"
 #include "DailyTimer.h"
+#include "pcap.h"
 
 class Config;
 
