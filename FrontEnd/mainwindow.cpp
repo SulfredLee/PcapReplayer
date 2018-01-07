@@ -81,6 +81,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_pDailyTimer = nullptr;
 
+    setWindowTitle("PcapReplayer 2.0.0.15");
+    setWindowIcon(QIcon(":/app_icon.png"));
+
     LOGMSG_INFO("OUT");
 }
 
