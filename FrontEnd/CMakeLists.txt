@@ -13,6 +13,7 @@ file(GLOB FrontEnd_ui_proxy "${FrontEndPath}/*.ui")
 set(FrontEnd_src ${FrontEnd_src_proxy})
 set(FrontEnd_hdr ${FrontEnd_hdr_proxy})
 set(FrontEnd_ui  ${FrontEnd_ui_proxy})
+set(FrontEnd_rcc ${PROJECT_SOURCE_DIR}/FrontEnd/resource.qrc)
 
 qt5_wrap_cpp(FrontEnd_hdr_moc ${FrontEnd_hdr})
 qt5_wrap_ui (FrontEnd_ui_moc  ${FrontEnd_ui})
