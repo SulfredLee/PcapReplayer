@@ -6,6 +6,11 @@
 #include <QDirIterator>
 #include <QMessageBox>
 #include <QtWidgets/QTableWidget>
+#include <QtGui/QDragEnterEvent>
+#include <QtGui/QDragLeaveEvent>
+#include <QtGui/QDragMoveEvent>
+#include <QtGui/QDropEvent>
+#include <QtCore/QMimeData>
 
 
 #include <string>
@@ -60,6 +65,14 @@ private: // local utils
     std::map<std::string, std::string> ConvertQMap2StdMap(const QMap<QString, QString>& inMap);
     QMap<QString, QString> ConvertStdMap2QMap(const std::map<std::string, std::string>& inMap);
     void DailyTimerCallback();
+    // override
+    void dragEnterEvent(QDragEnterEvent* event);
+    // override
+    void dragMoveEvent(QDragMoveEvent* event);
+    // override
+    void dragLeaveEvent(QDragLeaveEvent* event);
+    // override
+    void dropEvent(QDropEvent* event);
 private:
     Ui::MainWindow *ui;
 

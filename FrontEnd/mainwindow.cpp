@@ -84,6 +84,9 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("PcapReplayer 2.0.0.15");
     setWindowIcon(QIcon(":/app_icon.png"));
 
+    // init file drop
+    setAcceptDrops(true);
+
     LOGMSG_INFO("OUT");
 }
 
@@ -386,6 +389,49 @@ void MainWindow::DailyTimerCallback(){
         ssTempLine << now.date().day_of_week()
                    << " " << now.date().day_of_week().as_number(); // Sunday: 0, Monday: 1, ... , Saturday: 6
         LOGMSG_INFO(ssTempLine.str());
+    }
+    LOGMSG_INFO("OUT");
+}
+
+// override
+void MainWindow::dragEnterEvent(QDragEnterEvent* event){
+    LOGMSG_INFO("IN");
+    // if some actions should not be usable, like move, this code must be adopted
+    event->acceptProposedAction();
+    LOGMSG_INFO("OUT");
+}
+
+// override
+void MainWindow::dragMoveEvent(QDragMoveEvent* event){
+    LOGMSG_INFO("IN");
+    // if some actions should not be usable, like move, this code must be adopted
+    event->acceptProposedAction();
+    LOGMSG_INFO("OUT");
+}
+
+// override
+void MainWindow::dragLeaveEvent(QDragLeaveEvent* event){
+    LOGMSG_INFO("IN");
+    // if some actions should not be usable, like move, this code must be adopted
+    event->accept();
+    LOGMSG_INFO("OUT");
+}
+
+// override
+void MainWindow::dropEvent(QDropEvent* event){
+    LOGMSG_INFO("IN");
+    const QMimeData* mimeData = event->mimeData();
+
+    if (mimeData->hasUrls()){
+        QStringList pathList;
+        QList<QUrl> urlList = mimeData->urls();
+
+        for (int i = 0; i < urlList.size(); ++i){
+            QString fileName = urlList.at(i).toLocalFile();
+            if (fileName.endsWith("pcap", Qt::CaseInsensitive))
+                pathList.append(urlList.at(i).toLocalFile());
+        }
+        AddPcapFilesToUI(pathList);
     }
     LOGMSG_INFO("OUT");
 }
