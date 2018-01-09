@@ -53,6 +53,7 @@ private:
     void AddPcapFilesToUI(const QStringList& INFiles);
     void AddIPMapToUI(const QMap<QString, QString>& SrcMap
                       , const QMap<QString, QString>& DstMap);
+    void AddSchedulToUI();
     void GetBitPerSec(double bit, QString& line, int step);
     QMap<QString, QString> GetMapFromNetworkTable(QTableWidget const * inTable);
 private: // local utils

@@ -1,7 +1,9 @@
 #include "Config.h"
 #include "LogMgr.h"
 
-Config::Config(){
+Config::Config()
+    : m_DateTime(boost::gregorian::date(1997, 7, 1)
+                 , boost::posix_time::time_duration(0, 0, 0)){
     LOGMSG_INFO("IN");
     m_PlayerStatus = PlayerStatus::Stop;
     m_nAdapterIdx = 0;

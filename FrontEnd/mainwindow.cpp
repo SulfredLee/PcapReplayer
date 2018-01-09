@@ -116,6 +116,7 @@ void MainWindow::InitComponent(const MainWindowComponent& InCompo){
     AddPcapFilesToUI(ConvertVectorString(m_Compo.pConfig->GetPcapFiles()));
     AddIPMapToUI(ConvertStdMap2QMap(m_Compo.pConfig->GetMapSrcIP())
                  , ConvertStdMap2QMap(m_Compo.pConfig->GetMapDstIP()));
+    AddSchedulToUI();
     LOGMSG_INFO("OUT");
 }
 
@@ -273,6 +274,90 @@ void MainWindow::AddIPMapToUI(const QMap<QString, QString>& SrcMap
         ui->tableWidget_NetMapDst->setItem(nRow, 1, new QTableWidgetItem(it.value()));
         nRow++;
     }
+}
+
+void MainWindow::AddSchedulToUI(){
+    LOGMSG_INFO("IN");
+    if (m_Compo.pConfig->GetSchedulerEnable()) {
+        QString qstrSchedulerStatus = "";
+        if (m_Compo.pConfig->GetOneTimeOnly()) {
+            m_pDailyTimer = new DailyTimer(m_Compo.pConfig->GetDateTime()
+                                           , boost::bind(&MainWindow::DailyTimerCallback, this));
+            // handle UI Label information
+            boost::posix_time::ptime tempTime = m_Compo.pConfig->GetDateTime();
+            qstrSchedulerStatus = "Scheduler On : ";
+            std::stringstream ssTempLine;
+            ssTempLine << tempTime.date().year() << "/"
+                       << tempTime.date().month() << "/"
+                       << tempTime.date().day() << " ";
+            qstrSchedulerStatus += ConvertString2QString(ssTempLine.str());
+        }else{
+            boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
+            boost::posix_time::ptime newTime(now.date()
+                                             , m_Compo.pConfig->GetDateTime().time_of_day());
+            if (newTime < now) {
+                boost::gregorian::date_duration dd(1);
+                boost::posix_time::ptime advanceTime(newTime.date() + dd
+                                                     , newTime.time_of_day());
+                newTime = advanceTime;
+            }
+            m_pDailyTimer = new DailyTimer(newTime
+                                           , boost::bind(&MainWindow::DailyTimerCallback, this));
+            // handle UI Label information
+            qstrSchedulerStatus = "Weekly Scheduler On : ";
+            std::vector<bool> vecTemp = m_Compo.pConfig->GetSchedulerDay();
+            for (size_t i = 0; i < vecTemp.size(); ++i) {
+                if (vecTemp[i]) {
+                    switch (i) {
+                    case 0: {
+                        qstrSchedulerStatus += "Sunday ";
+                        break;
+                    }
+                    case 1: {
+                        qstrSchedulerStatus += "Monday ";
+                        break;
+                    }
+                    case 2: {
+                        qstrSchedulerStatus += "Tuesdyay ";
+                        break;
+                    }
+                    case 3: {
+                        qstrSchedulerStatus += "Wednesday ";
+                        break;
+                    }
+                    case 4: {
+                        qstrSchedulerStatus += "Thrusday ";
+                        break;
+                    }
+                    case 5: {
+                        qstrSchedulerStatus += "Friday ";
+                        break;
+                    }
+                    case 6: {
+                        qstrSchedulerStatus += "Saturday ";
+                        break;
+                    }
+                    default:
+                        break;
+                    }
+                }
+            }
+        }
+        // handle UI Label information
+        boost::posix_time::ptime tempTime = m_Compo.pConfig->GetDateTime();
+        std::stringstream ssTempLine;
+        ssTempLine << tempTime.time_of_day().hours() << ":"
+                   << tempTime.time_of_day().minutes() << ":"
+                   << tempTime.time_of_day().seconds();
+        qstrSchedulerStatus += ConvertString2QString(ssTempLine.str());
+        ui->LabelSchedulerStatus->setText(qstrSchedulerStatus);
+        ui->LabelSchedulerStatus->setStyleSheet("QLabel {background-color : green; color : yellow; }");
+    }else{
+        // handle UI Label information
+        ui->LabelSchedulerStatus->setText("Scheduler Disabled");
+        ui->LabelSchedulerStatus->setStyleSheet("QLabel {background-color : red; color : blue;}");
+    }
+    LOGMSG_INFO("OUT");
 }
 
 void MainWindow::GetBitPerSec(double bit, QString& line, int step){
@@ -545,85 +630,8 @@ void MainWindow::onScheduler(){
         m_pDailyTimer = nullptr;
     }
 
-    if (m_Compo.pConfig->GetSchedulerEnable()) {
-        QString qstrSchedulerStatus = "";
-        if (m_Compo.pConfig->GetOneTimeOnly()) {
-            m_pDailyTimer = new DailyTimer(m_Compo.pConfig->GetDateTime()
-                                           , boost::bind(&MainWindow::DailyTimerCallback, this));
-            // handle UI Label information
-            boost::posix_time::ptime tempTime = m_Compo.pConfig->GetDateTime();
-            qstrSchedulerStatus = "Scheduler On : ";
-            std::stringstream ssTempLine;
-            ssTempLine << tempTime.date().year() << "/"
-                       << tempTime.date().month() << "/"
-                       << tempTime.date().day() << " ";
-            qstrSchedulerStatus += ConvertString2QString(ssTempLine.str());
-        }else{
-            boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
-            boost::posix_time::ptime newTime(now.date()
-                                             , m_Compo.pConfig->GetDateTime().time_of_day());
-            if (newTime < now) {
-                boost::gregorian::date_duration dd(1);
-                boost::posix_time::ptime advanceTime(newTime.date() + dd
-                                                     , newTime.time_of_day());
-                newTime = advanceTime;
-            }
-            m_pDailyTimer = new DailyTimer(newTime
-                                           , boost::bind(&MainWindow::DailyTimerCallback, this));
-            // handle UI Label information
-            qstrSchedulerStatus = "Weekly Scheduler On : ";
-            std::vector<bool> vecTemp = m_Compo.pConfig->GetSchedulerDay();
-            for (size_t i = 0; i < vecTemp.size(); ++i) {
-                if (vecTemp[i]) {
-                    switch (i) {
-                    case 0: {
-                        qstrSchedulerStatus += "Sunday ";
-                        break;
-                    }
-                    case 1: {
-                        qstrSchedulerStatus += "Monday ";
-                        break;
-                    }
-                    case 2: {
-                        qstrSchedulerStatus += "Tuesdyay ";
-                        break;
-                    }
-                    case 3: {
-                        qstrSchedulerStatus += "Wednesday ";
-                        break;
-                    }
-                    case 4: {
-                        qstrSchedulerStatus += "Thrusday ";
-                        break;
-                    }
-                    case 5: {
-                        qstrSchedulerStatus += "Friday ";
-                        break;
-                    }
-                    case 6: {
-                        qstrSchedulerStatus += "Saturday ";
-                        break;
-                    }
-                    default:
-                        break;
-                    }
-                }
-            }
-        }
-        // handle UI Label information
-        boost::posix_time::ptime tempTime = m_Compo.pConfig->GetDateTime();
-        std::stringstream ssTempLine;
-        ssTempLine << tempTime.time_of_day().hours() << ":"
-                   << tempTime.time_of_day().minutes() << ":"
-                   << tempTime.time_of_day().seconds();
-        qstrSchedulerStatus += ConvertString2QString(ssTempLine.str());
-        ui->LabelSchedulerStatus->setText(qstrSchedulerStatus);
-        ui->LabelSchedulerStatus->setStyleSheet("QLabel {background-color : green; color : yellow; }");
-    }else{
-        // handle UI Label information
-        ui->LabelSchedulerStatus->setText("Scheduler Disabled");
-        ui->LabelSchedulerStatus->setStyleSheet("QLabel {background-color : red; color : blue;}");
-    }
+    AddSchedulToUI();
+
     LOGMSG_INFO("OUT");
 }
 

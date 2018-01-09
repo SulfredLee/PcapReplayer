@@ -129,14 +129,14 @@ void SchedulerDialog::onConfirm(){
     // handle timeEdit
     QTime SchedulerTime = ui->timeEdit->time();
     if (ui->radioButton_OneTimeOnly->isChecked()) {
-        namespace namePT = boost::posix_time;
+        using namespace boost::posix_time;
         int nYear, nMonth, nDay;
         SchedulerDate.getDate(&nYear, &nMonth, &nDay);
         int nHour = SchedulerTime.hour();
         int nMinute = SchedulerTime.minute();
         int nSecond = SchedulerTime.second();
-        namePT::ptime pt(boost::gregorian::date(nYear, nMonth, nDay)
-                         , namePT::time_duration(nHour, nMinute, nSecond));
+        ptime pt(boost::gregorian::date(nYear, nMonth, nDay)
+                         , time_duration(nHour, nMinute, nSecond));
         m_pConfig->SetDateTime(pt);
 
         std::stringstream ssTempLine;
@@ -148,8 +148,8 @@ void SchedulerDialog::onConfirm(){
                    << nSecond;
         LOGMSG_INFO(ssTempLine.str());
     }else{
-        namespace namePT = boost::posix_time;
-        namePT::ptime now = namePT::second_clock::local_time();
+        using namespace boost::posix_time;
+        ptime now = second_clock::local_time();
         int nYear, nMonth, nDay;
         nYear = now.date().year();
         nMonth = now.date().month();
@@ -157,8 +157,8 @@ void SchedulerDialog::onConfirm(){
         int nHour = SchedulerTime.hour();
         int nMinute = SchedulerTime.minute();
         int nSecond = SchedulerTime.second();
-        namePT::ptime pt(boost::gregorian::date(nYear, nMonth, nDay)
-                         , namePT::time_duration(nHour, nMinute, nSecond));
+        ptime pt(boost::gregorian::date(nYear, nMonth, nDay)
+                         , time_duration(nHour, nMinute, nSecond));
         m_pConfig->SetDateTime(pt);
 
         std::stringstream ssTempLine;
@@ -170,6 +170,7 @@ void SchedulerDialog::onConfirm(){
                    << nSecond;
         LOGMSG_INFO(ssTempLine.str());
     }
+
     // handle radio box
     m_pConfig->SetOneTimeOnly(ui->radioButton_OneTimeOnly->isChecked());
     // handle check box
