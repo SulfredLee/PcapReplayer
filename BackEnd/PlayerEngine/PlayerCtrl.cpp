@@ -28,7 +28,7 @@ PlayerCtrl::~PlayerCtrl(){
     m_MsgQ.push(p);
     m_MsgQThread.join();
 
-    Serialization(true);
+    emit m_Compo.pMainWindow->onSerialization_FromPlayerCtrl(true);
 
     LOGMSG_INFO("OUT");
 }
@@ -44,8 +44,6 @@ void PlayerCtrl::InitComponent(const PlayerCtrlComponent& InCompo){
                               m_Compo.pConfig);
     m_PcapSender.InitComponent(boost::bind(&PlayerCtrl::Process_PcapSender, this, _1, _2),
                                m_Compo.pConfig);
-
-    Serialization(false);
 
     LOGMSG_INFO("OUT");
 }
@@ -149,67 +147,6 @@ void PlayerCtrl::Process_SpeedCtrl_2(unsigned int unSentByte, double dPktTime, d
 }
 
 void PlayerCtrl::Process_PcapSender(pcap_pkthdr* pHeader, const unsigned char* pData){
-}
-
-void PlayerCtrl::Serialization(const bool& bSave){
-    LOGMSG_INFO("IN");
-    if (bSave) {
-      std::ofstream ofs("default_config.cfg");
-      boost::archive::text_oarchive oa(ofs);
-      oa << m_Compo.pConfig->GetLatestFilePath();
-      oa << m_Compo.pConfig->GetPcapFiles();
-      oa << m_Compo.pConfig->GetMapDstIP();
-      oa << m_Compo.pConfig->GetMapSrcIP();
-      oa << m_Compo.pConfig->GetSchedulerEnable();
-      oa << m_Compo.pConfig->GetOneTimeOnly();
-      oa << m_Compo.pConfig->GetSchedulerDay();
-      oa << m_Compo.pConfig->GetDateTime().date().year().operator unsigned short();
-      oa << m_Compo.pConfig->GetDateTime().date().month().as_number(); // unsigned short
-      oa << m_Compo.pConfig->GetDateTime().date().day().as_number(); // unsigned short
-      oa << m_Compo.pConfig->GetDateTime().time_of_day().hours(); // long
-      oa << m_Compo.pConfig->GetDateTime().time_of_day().minutes(); // long
-      oa << m_Compo.pConfig->GetDateTime().time_of_day().seconds(); // long
-    }else{
-      std::ifstream ifs("default_config.cfg");
-      if (!ifs.is_open()) {
-          return;
-      }
-      boost::archive::text_iarchive ia(ifs);
-      std::string strTemp;
-      bool bTemp;
-      std::vector<std::string> vecStrTemp;
-      std::vector<bool> vecBoolTemp;
-      std::map<std::string, std::string> mapTemp;
-      ia >> strTemp;
-      m_Compo.pConfig->SetLatestFilePath(strTemp);
-      ia >> vecStrTemp;
-      m_Compo.pConfig->RemoveAllPcapFile();
-      m_Compo.pConfig->AddPcapFiles(vecStrTemp);
-      ia >> mapTemp;
-      m_Compo.pConfig->SetMapDstIP(mapTemp);
-      mapTemp.clear();
-      ia >> mapTemp;
-      m_Compo.pConfig->SetMapSrcIP(mapTemp);
-      ia >> bTemp;
-      m_Compo.pConfig->SetSchedulerEnable(bTemp);
-      ia >> bTemp;
-      m_Compo.pConfig->SetOneTimeOnly(bTemp);
-      ia >> vecBoolTemp;
-      m_Compo.pConfig->SetSchedulerDay(vecBoolTemp[0]
-                                       , vecBoolTemp[1]
-                                       , vecBoolTemp[2]
-                                       , vecBoolTemp[3]
-                                       , vecBoolTemp[4]
-                                       , vecBoolTemp[5]
-                                       , vecBoolTemp[6]);
-      unsigned short usYear, usMonth, usDay;
-      long lHour, lMinute, lSecond;
-      ia >> usYear >> usMonth >> usDay >> lHour >> lMinute >> lSecond;
-      boost::posix_time::ptime ptTemp(boost::gregorian::date(usYear, usMonth, usDay)
-                                      , boost::posix_time::time_duration(lHour, lMinute, lSecond));
-      m_Compo.pConfig->SetDateTime(ptTemp);
-    }
-    LOGMSG_INFO("OUT");
 }
 
 void PlayerCtrl::MsgQMain(){

@@ -30,39 +30,68 @@ void SchedulerDialog::InitComponent(Config* pConfig){
 }
 
 void SchedulerDialog::SwitchUIStatus_Init(){
-    // handle radio button
-    ui->radioButton_Weekly->setDown(false);
-    ui->radioButton_OneTimeOnly->setDown(false);
+    if (m_pConfig->GetSchedulerEnable()) {
+        // handle ratio button
+        ui->radioButton_Weekly->setChecked(!m_pConfig->GetOneTimeOnly());
+        ui->radioButton_OneTimeOnly->setChecked(m_pConfig->GetOneTimeOnly());
+        // handle check box
+        auto vecTemp = m_pConfig->GetSchedulerDay();
+        ui->checkBox_Enable->setCheckState(Qt::Checked);
+        ui->checkBox_Monday->setCheckState(vecTemp[1] ? Qt::Checked : Qt::Unchecked);
+        ui->checkBox_Tuesday->setCheckState(vecTemp[2] ? Qt::Checked : Qt::Unchecked);
+        ui->checkBox_Wednesday->setCheckState(vecTemp[3] ? Qt::Checked : Qt::Unchecked);
+        ui->checkBox_Thursday->setCheckState(vecTemp[4] ? Qt::Checked : Qt::Unchecked);
+        ui->checkBox_Friday->setCheckState(vecTemp[5] ? Qt::Checked : Qt::Unchecked);
+        ui->checkBox_Saturday->setCheckState(vecTemp[6] ? Qt::Checked : Qt::Unchecked);
+        ui->checkBox_Sunday->setCheckState(vecTemp[0] ? Qt::Checked : Qt::Unchecked);
 
-    ui->radioButton_Weekly->setEnabled(false);
-    ui->radioButton_OneTimeOnly->setEnabled(false);
-    // handle check box
-    ui->checkBox_Enable->setCheckState(Qt::Unchecked);
-    ui->checkBox_Monday->setCheckState(Qt::Unchecked);
-    ui->checkBox_Tuesday->setCheckState(Qt::Unchecked);
-    ui->checkBox_Wednesday->setCheckState(Qt::Unchecked);
-    ui->checkBox_Thursday->setCheckState(Qt::Unchecked);
-    ui->checkBox_Friday->setCheckState(Qt::Unchecked);
-    ui->checkBox_Saturday->setCheckState(Qt::Unchecked);
-    ui->checkBox_Sunday->setCheckState(Qt::Unchecked);
+        boost::posix_time::ptime date_time = m_pConfig->GetDateTime();
+        boost::gregorian::date date = date_time.date();
+        boost::posix_time::time_duration time = date_time.time_of_day();
+        // handle calendarWidget
+        QDate tempDate(date.year().operator unsigned short(), date.month().as_number(), date.day().as_number());
+        ui->calendarWidget->setSelectedDate(tempDate);
 
-    ui->checkBox_Enable->setEnabled(true);
-    ui->checkBox_Monday->setEnabled(false);
-    ui->checkBox_Tuesday->setEnabled(false);
-    ui->checkBox_Wednesday->setEnabled(false);
-    ui->checkBox_Thursday->setEnabled(false);
-    ui->checkBox_Friday->setEnabled(false);
-    ui->checkBox_Saturday->setEnabled(false);
-    ui->checkBox_Sunday->setEnabled(false);
+        // handle timeEdit
+        QTime tempTime(time.hours(), time.minutes(), time.seconds());
+        ui->timeEdit->setTime(tempTime);
+        m_pConfig->GetOneTimeOnly() ? SwitchUIStatus_OneTimeOnly() : SwitchUIStatus_Weekly();
+    }else {
+        // handle radio button
+        ui->radioButton_Weekly->setDown(false);
+        ui->radioButton_OneTimeOnly->setDown(false);
 
-    // handle calendarWidget
-    ui->calendarWidget->setEnabled(false);
+        ui->radioButton_Weekly->setEnabled(false);
+        ui->radioButton_OneTimeOnly->setEnabled(false);
+        // handle check box
+        ui->checkBox_Enable->setCheckState(Qt::Unchecked);
+        ui->checkBox_Monday->setCheckState(Qt::Unchecked);
+        ui->checkBox_Tuesday->setCheckState(Qt::Unchecked);
+        ui->checkBox_Wednesday->setCheckState(Qt::Unchecked);
+        ui->checkBox_Thursday->setCheckState(Qt::Unchecked);
+        ui->checkBox_Friday->setCheckState(Qt::Unchecked);
+        ui->checkBox_Saturday->setCheckState(Qt::Unchecked);
+        ui->checkBox_Sunday->setCheckState(Qt::Unchecked);
 
-    // handle timeEdit
-    ui->timeEdit->setEnabled(false);
+        ui->checkBox_Enable->setEnabled(true);
+        ui->checkBox_Monday->setEnabled(false);
+        ui->checkBox_Tuesday->setEnabled(false);
+        ui->checkBox_Wednesday->setEnabled(false);
+        ui->checkBox_Thursday->setEnabled(false);
+        ui->checkBox_Friday->setEnabled(false);
+        ui->checkBox_Saturday->setEnabled(false);
+        ui->checkBox_Sunday->setEnabled(false);
+
+        // handle calendarWidget
+        ui->calendarWidget->setEnabled(false);
+
+        // handle timeEdit
+        ui->timeEdit->setEnabled(false);
+    }
 }
 
 void SchedulerDialog::SwitchUIStatus_OneTimeOnly(){
+    LOGMSG_INFO("IN");
     // handle check box
     ui->checkBox_Monday->setEnabled(false);
     ui->checkBox_Tuesday->setEnabled(false);
@@ -75,9 +104,11 @@ void SchedulerDialog::SwitchUIStatus_OneTimeOnly(){
     ui->calendarWidget->setEnabled(true);
     // handle timeEdit
     ui->timeEdit->setEnabled(true);
+    LOGMSG_INFO("OUT");
 }
 
 void SchedulerDialog::SwitchUIStatus_Weekly(){
+    LOGMSG_INFO("IN");
     // handle check box
     ui->checkBox_Monday->setEnabled(true);
     ui->checkBox_Tuesday->setEnabled(true);
@@ -90,6 +121,7 @@ void SchedulerDialog::SwitchUIStatus_Weekly(){
     ui->calendarWidget->setEnabled(false);
     // handle timeEdit
     ui->timeEdit->setEnabled(true);
+    LOGMSG_INFO("OUT");
 }
 
 void SchedulerDialog::SwitchUIStatus_Enable(const bool& bIN){

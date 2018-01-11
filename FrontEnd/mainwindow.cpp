@@ -51,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, SIGNAL(onStatusBar_RemainLoopCount_FromPlayerCtrl(int)), this, SLOT(onStatusBar_RemainLoopCount(int)));
     connect(this, SIGNAL(onStatusBar_SendTimeDiff_FromPlayerCtrl(double)), this, SLOT(onStatusBar_SendTimeDiff(double)));
     connect(this, SIGNAL(onStatusBar_Invalidate_FromPlayerCtrl()), this, SLOT(onStatusBar_Invalidate()));
+    connect(this, SIGNAL(onSerialization_FromPlayerCtrl(bool)), this, SLOT(onSerialization(bool)));
 
     m_qstrCurAppPath = QDir::currentPath();
 
@@ -105,6 +106,7 @@ void MainWindow::InitComponent(const MainWindowComponent& InCompo){
     m_Compo = InCompo;
 
     // handle config
+    onSerialization(false);
     // handle UI
     ui->comboBox_InterfaceList->clear();
     auto vecTemp = m_Compo.pConfig->GetInterfaceInfo();
@@ -602,19 +604,59 @@ void MainWindow::onOpen_Folder(){
 
 void MainWindow::onSave_Config(){
     LOGMSG_INFO("IN");
-    QMessageBox TestingBox;
-    TestingBox.setWindowTitle(QString("Wait for input!"));
-    TestingBox.show();
-    TestingBox.exec();
+    QString qstrConfigFileName;
+    if (m_Compo.pConfig->GetConfigPath() == ""){
+        qstrConfigFileName = QFileDialog::getSaveFileName(this
+                                                    , tr("Save Config")
+                                                    , m_qstrCurAppPath
+                                                    , tr("Config Files (*.cfg)"));
+    }else{
+        qstrConfigFileName = QFileDialog::getSaveFileName(this
+                                                    , tr("Save Config")
+                                                    , ConvertString2QString(m_Compo.pConfig->GetConfigPath())
+                                                    , tr("Config Files (*.cfg)"));
+    }
+    if (qstrConfigFileName.length() == 0) {
+        return;
+    }
+
+    QFileInfo fileInfo(qstrConfigFileName);
+    m_Compo.pConfig->SetConfigPath(ConvertQString2String(fileInfo.filePath()));
+
+    onSerialization(true);
+    //    QMessageBox TestingBox;
+    //    TestingBox.setWindowTitle(QString("Wait for input!"));
+    //    TestingBox.show();
+    //    TestingBox.exec();
     LOGMSG_INFO("OUT");
 }
 
 void MainWindow::onLoad_Config(){
     LOGMSG_INFO("IN");
-    QMessageBox TestingBox;
-    TestingBox.setWindowTitle(QString("Wait for input!"));
-    TestingBox.show();
-    TestingBox.exec();
+    QString qstrConfigFileName;
+    if (m_Compo.pConfig->GetConfigPath() == "") {
+        qstrConfigFileName = QFileDialog::getOpenFileName(this
+                                                          , tr("Load Config")
+                                                          , m_qstrCurAppPath
+                                                          , tr("Config File (*.cfg)"));
+    }else {
+        qstrConfigFileName = QFileDialog::getOpenFileName(this
+                                                          , tr("Load Config")
+                                                          , ConvertString2QString(m_Compo.pConfig->GetConfigPath())
+                                                          , tr("Config File (*.cfg)"));
+    }
+    if (qstrConfigFileName.length() == 0){
+        return;
+    }
+
+    QFileInfo fileInfo(qstrConfigFileName);
+    m_Compo.pConfig->SetConfigPath(ConvertQString2String(fileInfo.filePath()));
+
+    onSerialization(true);
+    //    QMessageBox TestingBox;
+    //    TestingBox.setWindowTitle(QString("Wait for input!"));
+    //    TestingBox.show();
+    //    TestingBox.exec();
     LOGMSG_INFO("OUT");
 }
 
@@ -802,3 +844,65 @@ void MainWindow::onStatusBar_Invalidate(){
     qstrTempLine = m_qstrSendTimeDiff + "    " + m_qstrRemainLoopCount + "    " + m_qstrSentByte + "    " + m_qstrCurPktTime;
     ui->statusbar->showMessage(qstrTempLine);
 }
+
+void MainWindow::onSerialization(bool bSave){
+    LOGMSG_INFO("IN");
+    if (bSave) {
+        std::ofstream ofs(m_Compo.pConfig->GetConfigPath());
+        boost::archive::text_oarchive oa(ofs);
+        oa << m_Compo.pConfig->GetLatestFilePath();
+        oa << m_Compo.pConfig->GetPcapFiles();
+        oa << m_Compo.pConfig->GetMapDstIP();
+        oa << m_Compo.pConfig->GetMapSrcIP();
+        oa << m_Compo.pConfig->GetSchedulerEnable();
+        oa << m_Compo.pConfig->GetOneTimeOnly();
+        oa << m_Compo.pConfig->GetSchedulerDay();
+        oa << m_Compo.pConfig->GetDateTime().date().year().operator unsigned short();
+        oa << m_Compo.pConfig->GetDateTime().date().month().as_number(); // unsigned short
+        oa << m_Compo.pConfig->GetDateTime().date().day().as_number(); // unsigned short
+        oa << m_Compo.pConfig->GetDateTime().time_of_day().hours(); // long
+        oa << m_Compo.pConfig->GetDateTime().time_of_day().minutes(); // long
+        oa << m_Compo.pConfig->GetDateTime().time_of_day().seconds(); // long
+    }else{
+        std::ifstream ifs(m_Compo.pConfig->GetConfigPath());
+        if (!ifs.is_open()) {
+            return;
+        }
+        boost::archive::text_iarchive ia(ifs);
+        std::string strTemp;
+        bool bTemp;
+        std::vector<std::string> vecStrTemp;
+        std::vector<bool> vecBoolTemp;
+        std::map<std::string, std::string> mapTemp;
+        ia >> strTemp;
+        m_Compo.pConfig->SetLatestFilePath(strTemp);
+        ia >> vecStrTemp;
+        m_Compo.pConfig->RemoveAllPcapFile();
+        m_Compo.pConfig->AddPcapFiles(vecStrTemp);
+        ia >> mapTemp;
+        m_Compo.pConfig->SetMapDstIP(mapTemp);
+        mapTemp.clear();
+        ia >> mapTemp;
+        m_Compo.pConfig->SetMapSrcIP(mapTemp);
+        ia >> bTemp;
+        m_Compo.pConfig->SetSchedulerEnable(bTemp);
+        ia >> bTemp;
+        m_Compo.pConfig->SetOneTimeOnly(bTemp);
+        ia >> vecBoolTemp;
+        m_Compo.pConfig->SetSchedulerDay(vecBoolTemp[0]
+                                         , vecBoolTemp[1]
+                                         , vecBoolTemp[2]
+                                         , vecBoolTemp[3]
+                                         , vecBoolTemp[4]
+                                         , vecBoolTemp[5]
+                                         , vecBoolTemp[6]);
+        unsigned short usYear, usMonth, usDay;
+        long lHour, lMinute, lSecond;
+        ia >> usYear >> usMonth >> usDay >> lHour >> lMinute >> lSecond;
+        boost::posix_time::ptime ptTemp(boost::gregorian::date(usYear, usMonth, usDay)
+                                        , boost::posix_time::time_duration(lHour, lMinute, lSecond));
+        m_Compo.pConfig->SetDateTime(ptTemp);
+    }
+    LOGMSG_INFO("OUT");
+}
+

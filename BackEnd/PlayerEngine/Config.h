@@ -68,6 +68,10 @@ public:
     std::vector<bool> GetSchedulerDay();
     void SetDateTime(const boost::posix_time::ptime& DateTime);
     boost::posix_time::ptime GetDateTime();
+
+    // handle config path
+    void SetConfigPath(const std::string& strPath);
+    std::string GetConfigPath();
 private:
     std::vector<std::string> m_PcapFiles;
     std::string m_strLatestFilePath;
@@ -85,5 +89,8 @@ private:
     bool m_bOneTimeOnly;
     std::vector<bool> m_vecSchedulerDay;
     boost::posix_time::ptime m_DateTime;
+    // handle config path
+    std::string m_strDefaultConfigPath;
+    std::string m_strLatestConfigPath;
 };
 #endif

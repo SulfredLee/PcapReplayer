@@ -9,11 +9,6 @@
 #include <boost/chrono.hpp>
 #include <boost/atomic.hpp>
 #include <boost/timer.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/map.hpp>
 
 #include "Common.h"
 #include "MsgQ.h"
@@ -48,7 +43,7 @@ private:
     void Process_SpeedCtrl_1(pcap_pkthdr* pHeader, const unsigned char* pData);
     void Process_SpeedCtrl_2(unsigned int unSentByte, double dPktTime, double dSendTimeDiff);
     void Process_PcapSender(pcap_pkthdr* pHeader, const unsigned char* pData);
-    void Serialization(const bool& bSave);
+    void Serialization(const bool& bSave, const std::string& strFile);
     void MsgQMain();
     void ReplayMain();
 private:

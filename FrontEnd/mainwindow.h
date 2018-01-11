@@ -11,6 +11,8 @@
 #include <QtGui/QDragMoveEvent>
 #include <QtGui/QDropEvent>
 #include <QtCore/QMimeData>
+// #include <QtCore/QFile>
+// #include <QtWidgets/QFileDialog>
 
 
 #include <string>
@@ -19,6 +21,11 @@
 #include <map>
 
 #include <boost/date_time.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/map.hpp>
 
 #include "MsgQ.h"
 #include "Common.h"
@@ -96,6 +103,7 @@ signals:
     void onStatusBar_RemainLoopCount_FromPlayerCtrl(int);
     void onStatusBar_SendTimeDiff_FromPlayerCtrl(double);
     void onStatusBar_Invalidate_FromPlayerCtrl();
+    void onSerialization_FromPlayerCtrl(bool);
 private slots:
     // handle menu and tool bar
     void onOpen_File();
@@ -123,6 +131,7 @@ private slots:
     void onStatusBar_RemainLoopCount(int);
     void onStatusBar_SendTimeDiff(double);
     void onStatusBar_Invalidate();
+    void onSerialization(bool);
 };
 
 #endif // MAINWINDOW_H
