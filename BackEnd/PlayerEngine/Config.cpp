@@ -11,7 +11,7 @@ Config::Config()
     m_vecSchedulerDay.resize(7, false);
     m_strLatestFilePath = "";
     m_strDefaultConfigPath = "default_config.cfg";
-    m_strLatestFilePath = "";
+	m_strLatestConfigPath = "";
     m_bSchedulerEnable = false;
     LOGMSG_INFO("OUT");
 }
@@ -210,10 +210,10 @@ boost::posix_time::ptime Config::GetDateTime(){
 
 void Config::SetConfigPath(const std::string& strPath){
     boost::lock_guard<boost::mutex> lock(m_MuData);
-    m_strLatestFilePath = strPath;
+	m_strLatestConfigPath = strPath;
 }
 
 std::string Config::GetConfigPath(){
     boost::lock_guard<boost::mutex> lock(m_MuData);
-    return m_strLatestFilePath == "" ? m_strDefaultConfigPath : m_strLatestFilePath;
+	return m_strLatestConfigPath == "" ? m_strDefaultConfigPath : m_strLatestConfigPath;
 }

@@ -10,7 +10,10 @@ PcapSender::PcapSender(){
 }
 
 PcapSender::~PcapSender(){
-    
+	if (m_pAdapter != nullptr){
+		pcap_close(m_pAdapter);
+		m_pAdapter = nullptr;
+	}
 }
 
 void PcapSender::InitComponent(boost::function<void (pcap_pkthdr*, const unsigned char*)> f,

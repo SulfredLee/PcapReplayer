@@ -115,7 +115,9 @@ void MainWindow::InitComponent(const MainWindowComponent& InCompo){
         ui->comboBox_InterfaceList->setCurrentIndex(0);
     }
 
-    AddPcapFilesToUI(ConvertVectorString(m_Compo.pConfig->GetPcapFiles()));
+	std::vector<std::string> vecTempPcapFiles = m_Compo.pConfig->GetPcapFiles();
+	m_Compo.pConfig->RemoveAllPcapFile();
+	AddPcapFilesToUI(ConvertVectorString(vecTempPcapFiles));
     AddIPMapToUI(ConvertStdMap2QMap(m_Compo.pConfig->GetMapSrcIP())
                  , ConvertStdMap2QMap(m_Compo.pConfig->GetMapDstIP()));
     AddSchedulToUI();
@@ -247,6 +249,7 @@ void MainWindow::AddPcapFilesToUI(const QStringList& INFiles){
     // handle config
     QFileInfo fileInfo(INFiles.front());
     m_Compo.pConfig->SetLatestFilePath(ConvertQString2String(fileInfo.filePath()));
+	m_Compo.pConfig->AddPcapFiles(ConvertQStringList(INFiles));
 
     // handle UI
     for (qint32 i = 0; i < INFiles.length(); i++){
@@ -564,7 +567,6 @@ void MainWindow::onOpen_File(){
     }
     AddPcapFilesToUI(fileNames);
 
-    m_Compo.pConfig->AddPcapFiles(ConvertQStringList(fileNames));
     LOGMSG_INFO("OUT");
 }
 
@@ -598,7 +600,6 @@ void MainWindow::onOpen_Folder(){
     }
 
     AddPcapFilesToUI(fileNames);
-    m_Compo.pConfig->AddPcapFiles(ConvertQStringList(fileNames));
     LOGMSG_INFO("OUT");
 }
 
@@ -848,6 +849,7 @@ void MainWindow::onStatusBar_Invalidate(){
 void MainWindow::onSerialization(bool bSave){
     LOGMSG_INFO("IN");
     if (bSave) {
+		LOGMSG_INFO(m_Compo.pConfig->GetConfigPath());
         std::ofstream ofs(m_Compo.pConfig->GetConfigPath());
         boost::archive::text_oarchive oa(ofs);
         oa << m_Compo.pConfig->GetLatestFilePath();
@@ -864,6 +866,7 @@ void MainWindow::onSerialization(bool bSave){
         oa << m_Compo.pConfig->GetDateTime().time_of_day().minutes(); // long
         oa << m_Compo.pConfig->GetDateTime().time_of_day().seconds(); // long
     }else{
+		LOGMSG_INFO(m_Compo.pConfig->GetConfigPath());
         std::ifstream ifs(m_Compo.pConfig->GetConfigPath());
         if (!ifs.is_open()) {
             return;
