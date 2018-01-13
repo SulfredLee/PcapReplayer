@@ -7,6 +7,8 @@
 #include <boost/chrono.hpp>
 #include <boost/atomic.hpp>
 
+#include <time.h>
+
 class MSecTimer{
 public:
     template <class Fn, class... Args>
