@@ -64,7 +64,9 @@ void PcapReader::ReadFile(const std::string& strPcapFile){
             ReCalculateCheckSum_IPHeader(pMyData);
             ReCalculateCheckSum_UDP_Pkt(pMyData, header->len);
         }
-
+		if (pMyData != nullptr){
+			delete pMyData;
+		}
         // handle progressBar
         un64SentPacketSize += header->len + PCAPLOCALHEADERSIZE;
         float fProgress = (float)un64SentPacketSize / (float)un64CurFileSize;
