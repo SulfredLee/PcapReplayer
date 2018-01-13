@@ -104,6 +104,7 @@ signals:
     void onStatusBar_SendTimeDiff_FromPlayerCtrl(double);
     void onStatusBar_Invalidate_FromPlayerCtrl();
     void onSerialization_FromPlayerCtrl(bool);
+    void onListWidgetNextFile_FromPlayerCtrl();
 private slots:
     // handle menu and tool bar
     void onOpen_File();
@@ -132,6 +133,8 @@ private slots:
     void onStatusBar_SendTimeDiff(double);
     void onStatusBar_Invalidate();
     void onSerialization(bool);
+    // handle listWidget
+    void onListWidgetNextFile();
 };
 
 #endif // MAINWINDOW_H

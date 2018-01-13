@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, SIGNAL(onStatusBar_SendTimeDiff_FromPlayerCtrl(double)), this, SLOT(onStatusBar_SendTimeDiff(double)));
     connect(this, SIGNAL(onStatusBar_Invalidate_FromPlayerCtrl()), this, SLOT(onStatusBar_Invalidate()));
     connect(this, SIGNAL(onSerialization_FromPlayerCtrl(bool)), this, SLOT(onSerialization(bool)));
+    connect(this, SIGNAL(onListWidgetNextFile_FromPlayerCtrl()), this, SLOT(onListWidgetNextFile()));
 
     m_qstrCurAppPath = QDir::currentPath();
 
@@ -115,9 +116,9 @@ void MainWindow::InitComponent(const MainWindowComponent& InCompo){
         ui->comboBox_InterfaceList->setCurrentIndex(0);
     }
 
-	std::vector<std::string> vecTempPcapFiles = m_Compo.pConfig->GetPcapFiles();
-	m_Compo.pConfig->RemoveAllPcapFile();
-	AddPcapFilesToUI(ConvertVectorString(vecTempPcapFiles));
+    std::vector<std::string> vecTempPcapFiles = m_Compo.pConfig->GetPcapFiles();
+    m_Compo.pConfig->RemoveAllPcapFile();
+    AddPcapFilesToUI(ConvertVectorString(vecTempPcapFiles));
     AddIPMapToUI(ConvertStdMap2QMap(m_Compo.pConfig->GetMapSrcIP())
                  , ConvertStdMap2QMap(m_Compo.pConfig->GetMapDstIP()));
     AddSchedulToUI();
@@ -249,7 +250,7 @@ void MainWindow::AddPcapFilesToUI(const QStringList& INFiles){
     // handle config
     QFileInfo fileInfo(INFiles.front());
     m_Compo.pConfig->SetLatestFilePath(ConvertQString2String(fileInfo.filePath()));
-	m_Compo.pConfig->AddPcapFiles(ConvertQStringList(INFiles));
+    m_Compo.pConfig->AddPcapFiles(ConvertQStringList(INFiles));
 
     // handle UI
     for (qint32 i = 0; i < INFiles.length(); i++){
@@ -608,14 +609,14 @@ void MainWindow::onSave_Config(){
     QString qstrConfigFileName;
     if (m_Compo.pConfig->GetConfigPath() == ""){
         qstrConfigFileName = QFileDialog::getSaveFileName(this
-                                                    , tr("Save Config")
-                                                    , m_qstrCurAppPath
-                                                    , tr("Config Files (*.cfg)"));
+                                                          , tr("Save Config")
+                                                          , m_qstrCurAppPath
+                                                          , tr("Config Files (*.cfg)"));
     }else{
         qstrConfigFileName = QFileDialog::getSaveFileName(this
-                                                    , tr("Save Config")
-                                                    , ConvertString2QString(m_Compo.pConfig->GetConfigPath())
-                                                    , tr("Config Files (*.cfg)"));
+                                                          , tr("Save Config")
+                                                          , ConvertString2QString(m_Compo.pConfig->GetConfigPath())
+                                                          , tr("Config Files (*.cfg)"));
     }
     if (qstrConfigFileName.length() == 0) {
         return;
@@ -730,6 +731,7 @@ void MainWindow::onStop(){
     }
 
     SwitchUIStatus_Stop();
+    AddSchedulToUI();
 
     auto p = boost::make_shared<PlayerMsg>();
     *p = PlayerMsg::Stop;
@@ -789,10 +791,10 @@ void MainWindow::onRemoveScrMapIP(){
     }
     ui->tableWidget_NetMapSrc->removeRow(nCurRow);
 
-//  QMessageBox TestingBox;
-//  TestingBox.setWindowTitle(QString("Wait for input!"));
-//  TestingBox.show();
-//  TestingBox.exec();
+    //  QMessageBox TestingBox;
+    //  TestingBox.setWindowTitle(QString("Wait for input!"));
+    //  TestingBox.show();
+    //  TestingBox.exec();
     LOGMSG_INFO("OUT");
 }
 
@@ -849,7 +851,7 @@ void MainWindow::onStatusBar_Invalidate(){
 void MainWindow::onSerialization(bool bSave){
     LOGMSG_INFO("IN");
     if (bSave) {
-		LOGMSG_INFO(m_Compo.pConfig->GetConfigPath());
+        LOGMSG_INFO(m_Compo.pConfig->GetConfigPath());
         std::ofstream ofs(m_Compo.pConfig->GetConfigPath());
         boost::archive::text_oarchive oa(ofs);
         oa << m_Compo.pConfig->GetLatestFilePath();
@@ -866,7 +868,7 @@ void MainWindow::onSerialization(bool bSave){
         oa << m_Compo.pConfig->GetDateTime().time_of_day().minutes(); // long
         oa << m_Compo.pConfig->GetDateTime().time_of_day().seconds(); // long
     }else{
-		LOGMSG_INFO(m_Compo.pConfig->GetConfigPath());
+        LOGMSG_INFO(m_Compo.pConfig->GetConfigPath());
         std::ifstream ifs(m_Compo.pConfig->GetConfigPath());
         if (!ifs.is_open()) {
             return;
@@ -909,3 +911,11 @@ void MainWindow::onSerialization(bool bSave){
     LOGMSG_INFO("OUT");
 }
 
+void MainWindow::onListWidgetNextFile(){
+    LOGMSG_INFO("IN");
+    int nCurRow = ui->listWidget_FileList->currentRow();
+    int nTotalFiles = ui->listWidget_FileList->count();
+    nCurRow = ++nCurRow % nTotalFiles;
+    ui->listWidget_FileList->setCurrentRow(nCurRow);
+    LOGMSG_INFO("OUT");
+}

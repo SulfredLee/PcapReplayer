@@ -198,6 +198,8 @@ void PlayerCtrl::ReplayMain(){
             ssLine.str(std::string());
             ssLine << "Finish replay: " << vecPcapFiles[i];
             LOGMSG_INFO(ssLine.str());
+
+            emit m_Compo.pMainWindow->onListWidgetNextFile_FromPlayerCtrl();
         }
     }while (--m_nLoopCount > 0);
     // always return to stop UI status when all files are finished
