@@ -60,29 +60,26 @@ add_executable(PcapReplayer ${BackEnd_src})
 add_dependencies(PcapReplayer FrontEnd Utils)
 
 if (UNIX)
-  file(GLOB BackEnd_lib
-    ${PROJECT_BINARY_DIR}/FrontEnd/libFrontEnd.a
-    ${PROJECT_BINARY_DIR}/Utils/libUtils.a
-    ${libpcap_LIBRARY_DIR}/libpcap.so.1.8.1)
   target_link_libraries(PcapReplayer
-    debug ${BackEnd_lib}
-    optimized ${BackEnd_lib}
+    debug ${PROJECT_BINARY_DIR}/FrontEnd/libFrontEnd.a
+    debug ${PROJECT_BINARY_DIR}/Utils/libUtils.a
+    debug ${libpcap_LIBRARY_DIR}/libpcap.so.1.8.1
+    optimized ${PROJECT_BINARY_DIR}/FrontEnd/libFrontEnd.a
+    optimized ${PROJECT_BINARY_DIR}/Utils/libUtils.a
+    optimized ${libpcap_LIBRARY_DIR}/libpcap.so.1.8.1
     ${CMAKE_THREAD_LIBS_INIT}) # include this package to fix problem 001
 else ()
   SET(TPN_WIN32_LIB ws2_32.lib)
-  file(GLOB BackEnd_lib
-    ${PROJECT_BINARY_DIR}/FrontEnd/libFrontEnd.lib
-    ${PROJECT_BINARY_DIR}/Utils/libUtils.lib)
   target_link_libraries(PcapReplayer
     debug ${PROJECT_BINARY_DIR}/FrontEnd/Debug/FrontEnd.lib
     debug ${PROJECT_BINARY_DIR}/Utils/Debug/Utils.lib
-	debug ${libpcap_LIBRARY_DIR}/x64/Packet.lib
-	debug ${libpcap_LIBRARY_DIR}/x64/wpcap.lib
-	optimized ${PROJECT_BINARY_DIR}/FrontEnd/Release/FrontEnd.lib
+	  debug ${libpcap_LIBRARY_DIR}/x64/Packet.lib
+	  debug ${libpcap_LIBRARY_DIR}/x64/wpcap.lib
+	  optimized ${PROJECT_BINARY_DIR}/FrontEnd/Release/FrontEnd.lib
     optimized ${PROJECT_BINARY_DIR}/Utils/Release/Utils.lib
-	optimized ${libpcap_LIBRARY_DIR}/x64/Packet.lib
-	optimized ${libpcap_LIBRARY_DIR}/x64/wpcap.lib
-	${TPN_WIN32_LIB})
+	  optimized ${libpcap_LIBRARY_DIR}/x64/Packet.lib
+	  optimized ${libpcap_LIBRARY_DIR}/x64/wpcap.lib
+	  ${TPN_WIN32_LIB})
 endif()
 target_link_libraries(PcapReplayer
   ${Qt5Core_LIBRARIES}
