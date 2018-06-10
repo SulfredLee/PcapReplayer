@@ -108,6 +108,7 @@ void MainWindow::InitComponent(const MainWindowComponent& InCompo){
 
     // handle config
     onSerialization(false);
+    m_Compo.pConfig->SetLatestFilePath(ConvertQString2String(m_qstrCurAppPath));
     // handle UI
     ui->comboBox_InterfaceList->clear();
     auto vecTemp = m_Compo.pConfig->GetInterfaceInfo();
