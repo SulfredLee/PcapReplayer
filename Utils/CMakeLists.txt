@@ -1,19 +1,18 @@
-file(GLOB Utils_src
-  "${PROJECT_SOURCE_DIR}/Utils/*.cpp"
-  "${PROJECT_SOURCE_DIR}/Utils/*.h")
+set(targetName "Utils")
+set(folderName "Utils")
 
-message(STATUS "Utils - include path: ${Boost_INCLUDE_DIR}")
+file(GLOB ${folderName}_inc
+  "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+file(GLOB ${folderName}_src
+  "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
-include_directories(${PROJECT_SOURCE_DIR}/Utils
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}
   ${Boost_INCLUDE_DIR})
 
 # state that this project is a library
-add_library(Utils
-  ${Utils_src}) # static library
-# add_library(Utils SHARED ${Utils_src}) # dynamic library
+add_library(${targetName} ${${folderName}_src}) # static library
+# add_library(Utils SHARED ${${folderName}_src}) # dynamic library
 
 # Adds logic to INSTALL.vcproj to copy *.a to destination directory
-install (TARGETS Utils
-  RUNTIME DESTINATION ${PROJECT_BINARY_DIR}/bin
-  LIBRARY DESTINATION ${PROJECT_BINARY_DIR}/bin
-  ARCHIVE DESTINATION ${PROJECT_BINARY_DIR}/bin)
+install (TARGETS ${targetName} DESTINATION bin)
+install (FILES ${${folderName}_inc} DESTINATION include)

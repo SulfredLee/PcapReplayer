@@ -1,55 +1,48 @@
+set(targetName "FrontEnd")
+set(folderName "FrontEnd")
+
 # Handle QT libraries
-find_package(Qt5 REQUIRED
-  Widgets)
-message(STATUS "FrontEnd - QT library status:")
-message(STATUS "FrontEnd -     version: ${Qt5Widgets_VERSION}")
-message(STATUS "FrontEnd -     libraries: ${Qt5Widgets_LIBRARIES}")
-message(STATUS "FrontEnd -     include path: ${QT_INCLUDE_DIR}")
+file(GLOB ${folderName}_src_proxy "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+file(GLOB ${folderName}_hdr_proxy "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+file(GLOB ${folderName}_ui_proxy "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
+set(${folderName}_src ${FrontEnd_src_proxy})
+set(${folderName}_hdr ${FrontEnd_hdr_proxy})
+set(${folderName}_ui  ${FrontEnd_ui_proxy})
+set(${folderName}_rcc ${CMAKE_CURRENT_SOURCE_DIR}/resource.qrc)
+qt5_wrap_cpp(${folderName}_hdr_moc ${${folderName}_hdr})
+qt5_wrap_ui (${folderName}_ui_moc  ${${folderName}_ui})
+qt5_add_resources(${folderName}_rcc_moc ${${folderName}_rcc})
 
-set(FrontEndPath ${PROJECT_SOURCE_DIR}/FrontEnd)
-file(GLOB FrontEnd_src_proxy "${FrontEndPath}/*.cpp")
-file(GLOB FrontEnd_hdr_proxy "${FrontEndPath}/*.h")
-file(GLOB FrontEnd_ui_proxy "${FrontEndPath}/*.ui")
-set(FrontEnd_src ${FrontEnd_src_proxy})
-set(FrontEnd_hdr ${FrontEnd_hdr_proxy})
-set(FrontEnd_ui  ${FrontEnd_ui_proxy})
-set(FrontEnd_rcc ${PROJECT_SOURCE_DIR}/FrontEnd/resource.qrc)
-
-qt5_wrap_cpp(FrontEnd_hdr_moc ${FrontEnd_hdr})
-qt5_wrap_ui (FrontEnd_ui_moc  ${FrontEnd_ui})
-qt5_add_resources(FrontEnd_rcc_moc ${FrontEnd_rcc})
-
-# handle additional custome classes
-file(GLOB PlayerEngine_src
-  "${PROJECT_SOURCE_DIR}/BackEnd/PlayerEngine/*.cpp"
+# handle other resource
+file(GLOB PlayerEngine_inc
   "${PROJECT_SOURCE_DIR}/BackEnd/PlayerEngine/*.h")
+file(GLOB PlayerEngine_src
+  "${PROJECT_SOURCE_DIR}/BackEnd/PlayerEngine/*.cpp")
 
 include_directories(${libpcap_INCLUDE_DIR}
   ${QT_INCLUDE_DIR}
-  ${PROJECT_SOURCE_DIR}/FrontEnd
+  ${CMAKE_CURRENT_SOURCE_DIR}
   ${PROJECT_SOURCE_DIR}/BackEnd/PlayerEngine
   ${PROJECT_SOURCE_DIR}/Utils
   ${PROJECT_BINARY_DIR}/FrontEnd
   ${QT_INCLUDE_DIR}/QtWidgets
   ${Boost_INCLUDE_DIR})
 
-add_library(FrontEnd
-  ${FrontEnd_src}
-  ${FrontEnd_hdr}
-  ${FrontEnd_hdr_moc}
-  ${FrontEnd_ui_moc}
-  ${FrontEnd_rcc_moc}
+add_library(${targetName}
+  ${${folderName}_src}
+  ${${folderName}_hdr}
+  ${${folderName}_hdr_moc}
+  ${${folderName}_ui_moc}
+  ${${folderName}_rcc_moc}
   ${PlayerEngine_src})
 
-target_link_libraries(FrontEnd
+target_link_libraries(${targetName}
   ${Qt5Widgets_LIBRARIES}
   Utils)
 
 # Creates a folder "libraries" and adds target project (*.vcproj) under it
-set_property(TARGET FrontEnd PROPERTY FOLDER "libraries")
+set_property(TARGET ${targetName} PROPERTY FOLDER "libraries")
 
 # Adds logic to INSTALL.vcproj to copy *.lib to destination directory
-install (TARGETS FrontEnd
-		 RUNTIME DESTINATION ${PROJECT_BINARY_DIR}/bin
-		 LIBRARY DESTINATION ${PROJECT_BINARY_DIR}/bin
-		 ARCHIVE DESTINATION ${PROJECT_BINARY_DIR}/bin)
+install (TARGETS ${targetName} DESTINATION bin)
+install (FILES ${${folderName}_hdr_proxy} DESTINATION include)
