@@ -1,5 +1,6 @@
 set(targetName "PcapReplayer")
-set(folderName "BackEnd")
+get_filename_component(folderName ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+string(REPLACE " " "_" folderName ${folderName})
 
 file(GLOB ${folderName}_inc
   "${CMAKE_CURRENT_SOURCE_DIR}/PlayerEngine/*.h"

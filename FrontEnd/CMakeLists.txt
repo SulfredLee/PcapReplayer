@@ -1,5 +1,6 @@
 set(targetName "FrontEnd")
-set(folderName "FrontEnd")
+get_filename_component(folderName ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+string(REPLACE " " "_" folderName ${folderName})
 
 # Handle QT libraries
 file(GLOB ${folderName}_src_proxy "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
