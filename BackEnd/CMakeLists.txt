@@ -25,6 +25,8 @@ if (UNIX)
     ${CMAKE_THREAD_LIBS_INIT} # include this package to fix problem 001
     debug ${libpcap_LIBRARY_DIR}/libpcap.so.1.8.1
     optimized ${libpcap_LIBRARY_DIR}/libpcap.so.1.8.1)
+  # handle library files for installation
+  file(GLOB libpcap_libFile "${libpcap_LIBRARY_DIR}/*so*")
 else ()
   set(TPN_WIN32_LIB ws2_32.lib)
   target_link_libraries(${targetName}
@@ -49,4 +51,4 @@ set_property(TARGET ${targetName} PROPERTY FOLDER "executables")
 
 # Adds logic to INSTALL.vcproj to copy *.exe to destination directory
 install (TARGETS ${targetName} DESTINATION bin)
-# install (FILES ${${folderName}_inc} DESTINATION include)
+install (FILES ${libpcap_libFile} DESTINATION lib)

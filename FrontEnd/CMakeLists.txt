@@ -29,6 +29,12 @@ include_directories(${libpcap_INCLUDE_DIR}
   ${QT_INCLUDE_DIR}/QtWidgets
   ${Boost_INCLUDE_DIR})
 
+if (UNIX)
+  # handle library files for installation
+  file(GLOB libqt_libFile "${QT_LIBRARY_DIR}/*so*")
+else ()
+endif ()
+
 add_library(${targetName}
   ${${folderName}_src}
   ${${folderName}_hdr}
@@ -47,3 +53,4 @@ set_property(TARGET ${targetName} PROPERTY FOLDER "libraries")
 # Adds logic to INSTALL.vcproj to copy *.lib to destination directory
 install (TARGETS ${targetName} DESTINATION bin)
 install (FILES ${${folderName}_hdr_proxy} DESTINATION include)
+install (FILES ${libqt_libFile} DESTINATION lib)

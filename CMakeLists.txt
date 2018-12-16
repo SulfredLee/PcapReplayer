@@ -15,7 +15,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Command to output information to the console
 # Useful for displaying errors, warnings, and debugging
-set(CMAKE_CXX_FLAGS "-Wall -fPIC -std=c++11")
+set(CMAKE_CXX_FLAGS "-Wall -fPIC -std=c++11 -g")
 message(STATUS "Root - cxx Flags: " ${CMAKE_CXX_FLAGS})
 
 # Handle Preprocess Flags
@@ -85,6 +85,19 @@ endif ()
 set(libpcap_INCLUDE_DIR "${libpcap_ROOT}include")
 set(libpcap_LIBRARY_DIR "${libpcap_ROOT}lib")
 message(STATUS "Info - libpcap include path: ${libpcap_INCLUDE_DIR}")
+
+# Handle rpath while installation
+if (UNIX)
+  set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+  # the RPATH to be used when installing, but only if it's not a system directory
+  LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+  IF("${isSystemDir}" STREQUAL "-1")
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+  ENDIF("${isSystemDir}" STREQUAL "-1")
+else ()
+endif ()
 
 # Sub-directories where more CMakeLists.txt exist
 add_subdirectory(FrontEnd)
