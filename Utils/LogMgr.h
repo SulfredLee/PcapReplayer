@@ -161,9 +161,6 @@ namespace Logging
             boostInit();
         }
         ~CLogger(){
-            for (size_t i = 0; i<m_pTargets.size(); i++)
-                delete m_pTargets[i];
-            m_pTargets.clear();
         }
 
         void AddTarget(ILogTarget* pTarget){

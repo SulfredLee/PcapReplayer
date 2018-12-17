@@ -6,9 +6,6 @@
 PlayerCtrl::PlayerCtrl()
     : m_MsgQThread(&PlayerCtrl::MsgQMain, this){
     LOGMSG_INFO("IN");
-    auto p = boost::make_shared<PlayerMsg>();
-    *p = PlayerMsg::Stop;
-    m_MsgQ.push(p);
 
     m_bPause = false;
     m_nPreProgress = -1;
@@ -44,6 +41,10 @@ void PlayerCtrl::InitComponent(const PlayerCtrlComponent& InCompo){
                               m_Compo.pConfig);
     m_PcapSender.InitComponent(boost::bind(&PlayerCtrl::Process_PcapSender, this, _1, _2),
                                m_Compo.pConfig);
+
+    auto p = boost::make_shared<PlayerMsg>();
+    *p = PlayerMsg::Stop;
+    m_MsgQ.push(p);
 
     LOGMSG_INFO("OUT");
 }
