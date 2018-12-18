@@ -72,6 +72,10 @@ private: // local utils
     QString ConvertTime2QString(double dTime);
     std::map<std::string, std::string> ConvertQMap2StdMap(const QMap<QString, QString>& inMap);
     QMap<QString, QString> ConvertStdMap2QMap(const std::map<std::string, std::string>& inMap);
+    template<class T>
+        QVector<T> ConvertStdVec2QVec(const std::vector<T>& inVec);
+    template<class T>
+        std::vector<T> ConvertQVec2StdVec(const QVector<T>& inVec);
     void DailyTimerCallback();
     // override
     void dragEnterEvent(QDragEnterEvent* event);

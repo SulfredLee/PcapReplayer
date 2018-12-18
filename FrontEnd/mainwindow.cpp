@@ -856,30 +856,9 @@ void MainWindow::onSerialization(bool bSave){
         std::ofstream ofs(m_Compo.pConfig->GetConfigPath());
         boost::archive::text_oarchive oa(ofs);
         oa << m_Compo.pConfig->GetLatestFilePath();
-        if (m_Compo.pConfig->GetPcapFiles().size() == 0)
-        {
-            std::vector<std::string> tempVec;
-            tempVec.push_back("Empty.pcap");
-            oa << tempVec;
-        }
-        else
-            oa << m_Compo.pConfig->GetPcapFiles();
-        if (m_Compo.pConfig->GetMapDstIP().size() == 0)
-        {
-            std::map<std::string, std::string> tempMap;
-            tempMap.insert(std::make_pair("0.0.0.0", "0.0.0.0"));
-            oa << tempMap;
-        }
-        else
-            oa << m_Compo.pConfig->GetMapDstIP();
-        if (m_Compo.pConfig->GetMapDstIP().size() == 0)
-        {
-            std::map<std::string, std::string> tempMap;
-            tempMap.insert(std::make_pair("0.0.0.0", "0.0.0.0"));
-            oa << tempMap;
-        }
-        else
-            oa << m_Compo.pConfig->GetMapSrcIP();
+        oa << m_Compo.pConfig->GetPcapFiles();
+        oa << m_Compo.pConfig->GetMapDstIP();
+        oa << m_Compo.pConfig->GetMapSrcIP();
         oa << m_Compo.pConfig->GetSchedulerEnable();
         oa << m_Compo.pConfig->GetOneTimeOnly();
         oa << m_Compo.pConfig->GetSchedulerDay();
@@ -907,12 +886,10 @@ void MainWindow::onSerialization(bool bSave){
         m_Compo.pConfig->RemoveAllPcapFile();
         m_Compo.pConfig->AddPcapFiles(vecStrTemp);
         ia >> mapTemp;
-        if (mapTemp.find("0.0.0.0") == mapTemp.end() && mapTemp.size() != 0)
-            m_Compo.pConfig->SetMapDstIP(mapTemp);
+        m_Compo.pConfig->SetMapDstIP(mapTemp);
         mapTemp.clear();
         ia >> mapTemp;
-        if (mapTemp.find("0.0.0.0") == mapTemp.end() && mapTemp.size() != 0)
-            m_Compo.pConfig->SetMapSrcIP(mapTemp);
+        m_Compo.pConfig->SetMapSrcIP(mapTemp);
         ia >> bTemp;
         m_Compo.pConfig->SetSchedulerEnable(bTemp);
         ia >> bTemp;
@@ -942,4 +919,27 @@ void MainWindow::onListWidgetNextFile(){
     nCurRow = ++nCurRow % nTotalFiles;
     ui->listWidget_FileList->setCurrentRow(nCurRow);
     LOGMSG_INFO("OUT");
+}
+
+template<class T>
+QVector<T> MainWindow::ConvertStdVec2QVec(const std::vector<T>& inVec)
+{
+    QVector<T> outVec;
+    for (typename std::vector<T>::const_iterator it = inVec.begin(); it != inVec.end(); it++)
+    {
+        outVec.append(*it);
+    }
+    return outVec;
+}
+
+template<class T>
+std::vector<T> MainWindow::ConvertQVec2StdVec(const QVector<T>& inVec)
+{
+    std::vector<T> outVec;
+    QVectorIterator<T> it(inVec);
+    while(it.hasNext())
+    {
+        outVec.push_back(it.next());
+    }
+    return outVec;
 }
