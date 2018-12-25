@@ -11,8 +11,8 @@
 #include <QtGui/QDragMoveEvent>
 #include <QtGui/QDropEvent>
 #include <QtCore/QMimeData>
-// #include <QtCore/QFile>
-// #include <QtWidgets/QFileDialog>
+#include <QtCore/QFile>
+#include <QtWidgets/QFileDialog>
 
 
 #include <string>
@@ -76,6 +76,8 @@ private: // local utils
         QVector<T> ConvertStdVec2QVec(const std::vector<T>& inVec);
     template<class T>
         std::vector<T> ConvertQVec2StdVec(const QVector<T>& inVec);
+    QVector<QString> ConvertStringVec2QStringVec(const std::vector<std::string>& inVec);
+    std::vector<std::string> ConvertQStringVec2StringVec(const QVector<QString>& inVec);
     void DailyTimerCallback();
     // override
     void dragEnterEvent(QDragEnterEvent* event);

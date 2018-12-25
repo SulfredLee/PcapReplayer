@@ -853,61 +853,67 @@ void MainWindow::onSerialization(bool bSave){
     LOGMSG_INFO("IN");
     if (bSave) {
         LOGMSG_INFO(m_Compo.pConfig->GetConfigPath());
-        std::ofstream ofs(m_Compo.pConfig->GetConfigPath());
-        boost::archive::text_oarchive oa(ofs);
-        oa << m_Compo.pConfig->GetLatestFilePath();
-        oa << m_Compo.pConfig->GetPcapFiles();
-        oa << m_Compo.pConfig->GetMapDstIP();
-        oa << m_Compo.pConfig->GetMapSrcIP();
-        oa << m_Compo.pConfig->GetSchedulerEnable();
-        oa << m_Compo.pConfig->GetOneTimeOnly();
-        oa << m_Compo.pConfig->GetSchedulerDay();
-        oa << m_Compo.pConfig->GetDateTime().date().year().operator unsigned short();
-        oa << m_Compo.pConfig->GetDateTime().date().month().as_number(); // unsigned short
-        oa << m_Compo.pConfig->GetDateTime().date().day().as_number(); // unsigned short
-        oa << m_Compo.pConfig->GetDateTime().time_of_day().hours(); // long
-        oa << m_Compo.pConfig->GetDateTime().time_of_day().minutes(); // long
-        oa << m_Compo.pConfig->GetDateTime().time_of_day().seconds(); // long
+        QFile file(ConvertString2QString(m_Compo.pConfig->GetConfigPath()));
+        file.open(QIODevice::WriteOnly);
+        QDataStream out(&file);   // we will serialize the data into the file
+        out << ConvertString2QString(m_Compo.pConfig->GetLatestFilePath());
+        out << ConvertStringVec2QStringVec(m_Compo.pConfig->GetPcapFiles());
+        out << ConvertStdMap2QMap(m_Compo.pConfig->GetMapDstIP());
+        out << ConvertStdMap2QMap(m_Compo.pConfig->GetMapSrcIP());
+        out << m_Compo.pConfig->GetSchedulerEnable();
+        out << m_Compo.pConfig->GetOneTimeOnly();
+        out << ConvertStdVec2QVec(m_Compo.pConfig->GetSchedulerDay());
+        quint16 usYear, usMonth, usDay;
+        qint64 lHour, lMinute, lSecond;
+        usYear = m_Compo.pConfig->GetDateTime().date().year().operator unsigned short();
+        usMonth = m_Compo.pConfig->GetDateTime().date().month().as_number(); // unsigned short
+        usDay = m_Compo.pConfig->GetDateTime().date().day().as_number(); // unsigned short
+        lHour = m_Compo.pConfig->GetDateTime().time_of_day().hours(); // long
+        lMinute = m_Compo.pConfig->GetDateTime().time_of_day().minutes(); // long
+        lSecond = m_Compo.pConfig->GetDateTime().time_of_day().seconds(); // long
+        out << usYear << usMonth << usDay << lHour << lMinute << lSecond;
+        file.close();
     }else{
         LOGMSG_INFO(m_Compo.pConfig->GetConfigPath());
-        std::ifstream ifs(m_Compo.pConfig->GetConfigPath());
-        if (!ifs.is_open()) {
-            return;
-        }
-        boost::archive::text_iarchive ia(ifs);
-        std::string strTemp;
+        QFile file(ConvertString2QString(m_Compo.pConfig->GetConfigPath()));
+        file.open(QIODevice::ReadOnly);
+        QDataStream in(&file);
+        QString str;
+        QVector<QString> qStrVec;
+        QVector<bool> qBoolVec;
+        QMap<QString, QString> qStrMap;
         bool bTemp;
-        std::vector<std::string> vecStrTemp;
-        std::vector<bool> vecBoolTemp;
-        std::map<std::string, std::string> mapTemp;
-        ia >> strTemp;
-        m_Compo.pConfig->SetLatestFilePath(strTemp);
-        ia >> vecStrTemp;
+        in >> str;
+        m_Compo.pConfig->SetLatestFilePath(ConvertQString2String(str));
+        in >> qStrVec;
         m_Compo.pConfig->RemoveAllPcapFile();
-        m_Compo.pConfig->AddPcapFiles(vecStrTemp);
-        ia >> mapTemp;
-        m_Compo.pConfig->SetMapDstIP(mapTemp);
-        mapTemp.clear();
-        ia >> mapTemp;
-        m_Compo.pConfig->SetMapSrcIP(mapTemp);
-        ia >> bTemp;
+        m_Compo.pConfig->AddPcapFiles(ConvertQStringVec2StringVec(qStrVec));
+        in >> qStrMap;
+        m_Compo.pConfig->SetMapDstIP(ConvertQMap2StdMap(qStrMap));
+        in >> qStrMap;
+        m_Compo.pConfig->SetMapSrcIP(ConvertQMap2StdMap(qStrMap));
+        in >> bTemp;
         m_Compo.pConfig->SetSchedulerEnable(bTemp);
-        ia >> bTemp;
+        in >> bTemp;
         m_Compo.pConfig->SetOneTimeOnly(bTemp);
-        ia >> vecBoolTemp;
-        m_Compo.pConfig->SetSchedulerDay(vecBoolTemp[0]
-                                         , vecBoolTemp[1]
-                                         , vecBoolTemp[2]
-                                         , vecBoolTemp[3]
-                                         , vecBoolTemp[4]
-                                         , vecBoolTemp[5]
-                                         , vecBoolTemp[6]);
-        unsigned short usYear, usMonth, usDay;
-        long lHour, lMinute, lSecond;
-        ia >> usYear >> usMonth >> usDay >> lHour >> lMinute >> lSecond;
-        boost::posix_time::ptime ptTemp(boost::gregorian::date(usYear, usMonth, usDay)
-                                        , boost::posix_time::time_duration(lHour, lMinute, lSecond));
-        m_Compo.pConfig->SetDateTime(ptTemp);
+        in >> qBoolVec;
+        m_Compo.pConfig->SetSchedulerDay(qBoolVec[0]
+                                         , qBoolVec[1]
+                                         , qBoolVec[2]
+                                         , qBoolVec[3]
+                                         , qBoolVec[4]
+                                         , qBoolVec[5]
+                                         , qBoolVec[6]);
+        quint16 usYear, usMonth, usDay;
+        qint64 lHour, lMinute, lSecond;
+        in >> usYear >> usMonth >> usDay >> lHour >> lMinute >> lSecond;
+        if (usYear && usMonth && usDay && lHour && lMinute && lSecond)
+        {
+            boost::posix_time::ptime ptTemp(boost::gregorian::date(usYear, usMonth, usDay)
+                                            , boost::posix_time::time_duration(lHour, lMinute, lSecond));
+            m_Compo.pConfig->SetDateTime(ptTemp);
+        }
+        file.close();
     }
     LOGMSG_INFO("OUT");
 }
@@ -940,6 +946,27 @@ std::vector<T> MainWindow::ConvertQVec2StdVec(const QVector<T>& inVec)
     while(it.hasNext())
     {
         outVec.push_back(it.next());
+    }
+    return outVec;
+}
+
+QVector<QString> MainWindow::ConvertStringVec2QStringVec(const std::vector<std::string>& inVec)
+{
+    QVector<QString> outVec;
+    for (std::vector<std::string>::const_iterator it = inVec.begin(); it != inVec.end(); it++)
+    {
+        outVec.append(ConvertString2QString(*it));
+    }
+    return outVec;
+}
+
+std::vector<std::string> MainWindow::ConvertQStringVec2StringVec(const QVector<QString>& inVec)
+{
+    std::vector<std::string> outVec;
+    QVectorIterator<QString> it(inVec);
+    while(it.hasNext())
+    {
+        outVec.push_back(ConvertQString2String(it.next()));
     }
     return outVec;
 }
