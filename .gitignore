@@ -2,6 +2,7 @@ debug/
 release/
 build/
 build_18.04/
+Log/
 cscope.files
 cscope.out
 GPATH
