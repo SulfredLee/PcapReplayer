@@ -51,6 +51,6 @@ target_link_libraries(${targetName}
 set_property(TARGET ${targetName} PROPERTY FOLDER "libraries")
 
 # Adds logic to INSTALL.vcproj to copy *.lib to destination directory
-install (TARGETS ${targetName} DESTINATION bin)
+install (TARGETS ${targetName} DESTINATION lib)
 install (FILES ${${folderName}_hdr_proxy} DESTINATION include)
 install (FILES ${libqt_libFile} DESTINATION lib)

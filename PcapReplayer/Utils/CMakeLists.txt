@@ -18,5 +18,5 @@ add_library(${targetName} ${${folderName}_src}) # static library
 set_property(TARGET ${targetName} PROPERTY FOLDER "libraries")
 
 # Adds logic to INSTALL.vcproj to copy *.a to destination directory
-install (TARGETS ${targetName} DESTINATION bin)
+install (TARGETS ${targetName} DESTINATION lib)
 install (FILES ${${folderName}_inc} DESTINATION include)

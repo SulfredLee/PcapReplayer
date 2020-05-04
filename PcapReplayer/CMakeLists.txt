@@ -1,4 +1,4 @@
-# cmake -G Ninja ../PcapReplayer/ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=/Path/You/Want
+# cmake -G Ninja ../PcapReplayer/ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=../exampleLinux
 # cmake -G Ninja ../PcapReplayer/ -DCMAKE_BUILD_TYPE=Debug
 # cmake -G Ninja ../PcapReplayer/ -DCMAKE_BUILD_TYPE=Release
 cmake_minimum_required (VERSION 2.8.12)
