@@ -854,66 +854,70 @@ void MainWindow::onSerialization(bool bSave){
     if (bSave) {
         LOGMSG_INFO(m_Compo.pConfig->GetConfigPath());
         QFile file(ConvertString2QString(m_Compo.pConfig->GetConfigPath()));
-        file.open(QIODevice::WriteOnly);
-        QDataStream out(&file);   // we will serialize the data into the file
-        out << ConvertString2QString(m_Compo.pConfig->GetLatestFilePath());
-        out << ConvertStringVec2QStringVec(m_Compo.pConfig->GetPcapFiles());
-        out << ConvertStdMap2QMap(m_Compo.pConfig->GetMapDstIP());
-        out << ConvertStdMap2QMap(m_Compo.pConfig->GetMapSrcIP());
-        out << m_Compo.pConfig->GetSchedulerEnable();
-        out << m_Compo.pConfig->GetOneTimeOnly();
-        out << ConvertStdVec2QVec(m_Compo.pConfig->GetSchedulerDay());
-        quint16 usYear, usMonth, usDay;
-        qint64 lHour, lMinute, lSecond;
-        usYear = m_Compo.pConfig->GetDateTime().date().year().operator unsigned short();
-        usMonth = m_Compo.pConfig->GetDateTime().date().month().as_number(); // unsigned short
-        usDay = m_Compo.pConfig->GetDateTime().date().day().as_number(); // unsigned short
-        lHour = m_Compo.pConfig->GetDateTime().time_of_day().hours(); // long
-        lMinute = m_Compo.pConfig->GetDateTime().time_of_day().minutes(); // long
-        lSecond = m_Compo.pConfig->GetDateTime().time_of_day().seconds(); // long
-        out << usYear << usMonth << usDay << lHour << lMinute << lSecond;
-        file.close();
+        if (file.open(QIODevice::WriteOnly))
+        {
+            QDataStream out(&file);   // we will serialize the data into the file
+            out << ConvertString2QString(m_Compo.pConfig->GetLatestFilePath());
+            out << ConvertStringVec2QStringVec(m_Compo.pConfig->GetPcapFiles());
+            out << ConvertStdMap2QMap(m_Compo.pConfig->GetMapDstIP());
+            out << ConvertStdMap2QMap(m_Compo.pConfig->GetMapSrcIP());
+            out << m_Compo.pConfig->GetSchedulerEnable();
+            out << m_Compo.pConfig->GetOneTimeOnly();
+            out << ConvertStdVec2QVec(m_Compo.pConfig->GetSchedulerDay());
+            quint16 usYear, usMonth, usDay;
+            qint64 lHour, lMinute, lSecond;
+            usYear = m_Compo.pConfig->GetDateTime().date().year().operator unsigned short();
+            usMonth = m_Compo.pConfig->GetDateTime().date().month().as_number(); // unsigned short
+            usDay = m_Compo.pConfig->GetDateTime().date().day().as_number(); // unsigned short
+            lHour = m_Compo.pConfig->GetDateTime().time_of_day().hours(); // long
+            lMinute = m_Compo.pConfig->GetDateTime().time_of_day().minutes(); // long
+            lSecond = m_Compo.pConfig->GetDateTime().time_of_day().seconds(); // long
+            out << usYear << usMonth << usDay << lHour << lMinute << lSecond;
+            file.close();
+        }
     }else{
         LOGMSG_INFO(m_Compo.pConfig->GetConfigPath());
         QFile file(ConvertString2QString(m_Compo.pConfig->GetConfigPath()));
-        file.open(QIODevice::ReadOnly);
-        QDataStream in(&file);
-        QString str;
-        QVector<QString> qStrVec;
-        QVector<bool> qBoolVec;
-        QMap<QString, QString> qStrMap;
-        bool bTemp;
-        in >> str;
-        m_Compo.pConfig->SetLatestFilePath(ConvertQString2String(str));
-        in >> qStrVec;
-        m_Compo.pConfig->RemoveAllPcapFile();
-        m_Compo.pConfig->AddPcapFiles(ConvertQStringVec2StringVec(qStrVec));
-        in >> qStrMap;
-        m_Compo.pConfig->SetMapDstIP(ConvertQMap2StdMap(qStrMap));
-        in >> qStrMap;
-        m_Compo.pConfig->SetMapSrcIP(ConvertQMap2StdMap(qStrMap));
-        in >> bTemp;
-        m_Compo.pConfig->SetSchedulerEnable(bTemp);
-        in >> bTemp;
-        m_Compo.pConfig->SetOneTimeOnly(bTemp);
-        in >> qBoolVec;
-        m_Compo.pConfig->SetSchedulerDay(qBoolVec[0]
-                                         , qBoolVec[1]
-                                         , qBoolVec[2]
-                                         , qBoolVec[3]
-                                         , qBoolVec[4]
-                                         , qBoolVec[5]
-                                         , qBoolVec[6]);
-        quint16 usYear, usMonth, usDay;
-        qint64 lHour, lMinute, lSecond;
-        in >> usYear >> usMonth >> usDay >> lHour >> lMinute >> lSecond;
-        if (usYear && usMonth && usDay && lHour && lMinute && lSecond)
+        if (file.open(QIODevice::ReadOnly))
         {
-            boost::posix_time::ptime ptTemp(boost::gregorian::date(usYear, usMonth, usDay)
-                                            , boost::posix_time::time_duration(lHour, lMinute, lSecond));
-            m_Compo.pConfig->SetDateTime(ptTemp);
+            QDataStream in(&file);
+            QString str;
+            QVector<QString> qStrVec;
+            QVector<bool> qBoolVec;
+            QMap<QString, QString> qStrMap;
+            bool bTemp;
+            in >> str;
+            m_Compo.pConfig->SetLatestFilePath(ConvertQString2String(str));
+            in >> qStrVec;
+            m_Compo.pConfig->RemoveAllPcapFile();
+            m_Compo.pConfig->AddPcapFiles(ConvertQStringVec2StringVec(qStrVec));
+            in >> qStrMap;
+            m_Compo.pConfig->SetMapDstIP(ConvertQMap2StdMap(qStrMap));
+            in >> qStrMap;
+            m_Compo.pConfig->SetMapSrcIP(ConvertQMap2StdMap(qStrMap));
+            in >> bTemp;
+            m_Compo.pConfig->SetSchedulerEnable(bTemp);
+            in >> bTemp;
+            m_Compo.pConfig->SetOneTimeOnly(bTemp);
+            in >> qBoolVec;
+            m_Compo.pConfig->SetSchedulerDay(qBoolVec[0]
+                                             , qBoolVec[1]
+                                             , qBoolVec[2]
+                                             , qBoolVec[3]
+                                             , qBoolVec[4]
+                                             , qBoolVec[5]
+                                             , qBoolVec[6]);
+            quint16 usYear, usMonth, usDay;
+            qint64 lHour, lMinute, lSecond;
+            in >> usYear >> usMonth >> usDay >> lHour >> lMinute >> lSecond;
+            if (usYear && usMonth && usDay && lHour && lMinute && lSecond)
+            {
+                boost::posix_time::ptime ptTemp(boost::gregorian::date(usYear, usMonth, usDay)
+                                                , boost::posix_time::time_duration(lHour, lMinute, lSecond));
+                m_Compo.pConfig->SetDateTime(ptTemp);
+            }
+            file.close();
         }
-        file.close();
     }
     LOGMSG_INFO("OUT");
 }
