@@ -1,5 +1,5 @@
 #ifndef CONFIG_H
-#define DONFIG_H
+#define CONFIG_H
 
 #include <boost/thread/mutex.hpp>
 #include <boost/date_time.hpp>
@@ -8,6 +8,7 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include <mutex>
 
 #include "Common.h"
 #include "AdapterInfo.h"
@@ -83,7 +84,7 @@ private:
     double m_dSpeedLimit; // MBit/s
     std::map<std::string, std::string> m_mapDstIP;
     std::map<std::string, std::string> m_mapSrcIP;
-    boost::mutex m_MuData;
+    std::mutex m_MuData;
     // handle Scheduler
     bool m_bSchedulerEnable;
     bool m_bOneTimeOnly;

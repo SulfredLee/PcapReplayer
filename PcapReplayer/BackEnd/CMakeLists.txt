@@ -23,10 +23,12 @@ add_dependencies(${targetName} FrontEnd Utils)
 if (UNIX)
   target_link_libraries(${targetName}
     ${CMAKE_THREAD_LIBS_INIT} # include this package to fix problem 001
-    debug ${libpcap_LIBRARY_DIR}/libpcap.so.1.8.1
-    optimized ${libpcap_LIBRARY_DIR}/libpcap.so.1.8.1)
+    debug ${libpcap_LIBRARY_DIR}/libpcap.so
+    optimized ${libpcap_LIBRARY_DIR}/libpcap.so)
+    # debug ${libpcap_LIBRARY_DIR}/libpcap.so.1.8.1
+    # optimized ${libpcap_LIBRARY_DIR}/libpcap.so.1.8.1)
   # handle library files for installation
-  file(GLOB libpcap_libFile "${libpcap_LIBRARY_DIR}/*so*")
+  file(GLOB libpcap_libFile "${libpcap_LIBRARY_DIR}/libpcap.so")
 else ()
   set(TPN_WIN32_LIB ws2_32.lib)
   target_link_libraries(${targetName}

@@ -1,3 +1,6 @@
+# cmake -G Ninja ../PcapReplayer/ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=/Path/You/Want
+# cmake -G Ninja ../PcapReplayer/ -DCMAKE_BUILD_TYPE=Debug
+# cmake -G Ninja ../PcapReplayer/ -DCMAKE_BUILD_TYPE=Release
 cmake_minimum_required (VERSION 2.8.12)
 
 # Maps to a solution filed (*.sln). The solution will
@@ -27,13 +30,16 @@ endif ()
 
 # Handle Boost libaries
 if (UNIX)
-  set(Boost_INCLUDE_DIR "/usr/local/boost/1.59.0/include")
-  set(Boost_LIBRARY_DIR "/usr/local/boost/1.59.0/lib")
+  # set(Boost_INCLUDE_DIR "/usr/local/boost/1.59.0/include")
+  # set(Boost_LIBRARY_DIR "/usr/local/boost/1.59.0/lib")
 else ()
   set(Boost_INCLUDE_DIR "C:\\boost\\1.59.0")
   set(Boost_LIBRARY_DIR "C:\\boost\\1.59.0\\lib64-msvc-12.0")
 endif ()
 set(Boost_USE_STATIC_LIBS   ON)
+# set(Boost_USE_STATIC_LIBS OFF)
+# set(Boost_USE_MULTITHREADED ON)
+# set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.59.0 REQUIRED
   log
   system
@@ -51,13 +57,13 @@ message(STATUS "Info -     include path: ${Boost_INCLUDE_DIR}")
 
 # Handle QT libaries
 if (UNIX)
-  set(QT_ROOT "/usr/local/Qt/5.6.2/5.6/gcc_64/")
+  # set(QT_ROOT "/usr/local/Qt/5.6.2/5.6/gcc_64/")
 else ()
   set(QT_ROOT "C:\\Qt\\5.6.2\\5.6\\msvc2013_64\\")
+  set(QT_INCLUDE_DIR "${QT_ROOT}include")
+  set(QT_LIBRARY_DIR "${QT_ROOT}lib")
+  set(CMAKE_PREFIX_PATH ${QT_ROOT})
 endif ()
-set(QT_INCLUDE_DIR "${QT_ROOT}include")
-set(QT_LIBRARY_DIR "${QT_ROOT}lib")
-set(CMAKE_PREFIX_PATH ${QT_ROOT})
 # Handle QT libraries
 find_package(Qt5 REQUIRED
   Core
@@ -67,6 +73,7 @@ message(STATUS "Info - QT library status:")
 message(STATUS "Info -     version: ${Qt5Widgets_VERSION}")
 message(STATUS "Info -     libraries: ${Qt5Widgets_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5Core_QTMAIN_LIBRARIES} ${Qt5Gui_LIBRARIES}")
 message(STATUS "Info -     include path: ${QT_INCLUDE_DIR}")
+message(STATUS "Info -     library path: ${QT_LIBRARY_DIR}")
 
 # Handle linux libraries
 if (UNIX)
@@ -78,26 +85,28 @@ message(STATUS "Info - CMAKE_THREAD_LIBS_INIT: ${CMAKE_THREAD_LIBS_INIT}")
 
 # Handle pcap libaries
 if (UNIX)
-  set(libpcap_ROOT "/usr/local/libpcap/1.8.1/")
+  # set(libpcap_ROOT "/usr/local/libpcap/1.8.1/")
+  set(libpcap_INCLUDE_DIR "/usr/include")
+  set(libpcap_LIBRARY_DIR "/usr/lib/x86_64-linux-gnu")
 else ()
   set(libpcap_ROOT "C:\\WpdPack\\4.1.2\\")
+  set(libpcap_INCLUDE_DIR "${libpcap_ROOT}include")
+  set(libpcap_LIBRARY_DIR "${libpcap_ROOT}lib")
 endif ()
-set(libpcap_INCLUDE_DIR "${libpcap_ROOT}include")
-set(libpcap_LIBRARY_DIR "${libpcap_ROOT}lib")
 message(STATUS "Info - libpcap include path: ${libpcap_INCLUDE_DIR}")
 
 # Handle rpath while installation
-if (UNIX)
-  set(CMAKE_SKIP_BUILD_RPATH  FALSE)
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-  # the RPATH to be used when installing, but only if it's not a system directory
-  LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-  IF("${isSystemDir}" STREQUAL "-1")
-    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-  ENDIF("${isSystemDir}" STREQUAL "-1")
-else ()
-endif ()
+# if (UNIX)
+#   set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+#   set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+#   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+#   # the RPATH to be used when installing, but only if it's not a system directory
+#   LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+#   IF("${isSystemDir}" STREQUAL "-1")
+#     set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+#   ENDIF("${isSystemDir}" STREQUAL "-1")
+# else ()
+# endif ()
 
 # Sub-directories where more CMakeLists.txt exist
 add_subdirectory(FrontEnd)
