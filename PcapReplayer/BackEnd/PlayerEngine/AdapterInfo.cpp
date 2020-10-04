@@ -1,6 +1,6 @@
 #include "AdapterInfo.h"
 
-#include "LogMgr.h"
+#include "Logger.h"
 #include "pcap.h"
 
 #ifdef WINDOWS
@@ -14,7 +14,8 @@
 #endif
 
 AdapterInfo::AdapterInfo(){
-    LOGMSG_INFO("IN");
+    LOGMSG_CLASS_NAME("AdapterInfo");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     char errbuff[PCAP_ERRBUF_SIZE];
     m_vecAdapterName.clear();
     m_vecInterfaceInfo.clear();
@@ -23,8 +24,7 @@ AdapterInfo::AdapterInfo(){
     pcap_if_t *pAlldevs;
     /* Retrieve the device list on the local machine */
     if (pcap_findalldevs(&pAlldevs, errbuff) == -1){
-        std::string strTemp = "Error in pcap_findalldevs: " + std::string(errbuff);
-        LOGMSG_ERROR(strTemp);
+        LOGMSG_ERR_S() << "Error in pcap_findalldevs: " << std::string(errbuff) << std::endl;
     }
 
     m_bHasAdapter = false;
@@ -60,11 +60,11 @@ AdapterInfo::AdapterInfo(){
             }
         }
     }
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 AdapterInfo::~AdapterInfo(){
-    
+
 }
 
 std::vector<std::string> AdapterInfo::GetAdapterName(){
@@ -96,25 +96,24 @@ std::vector<std::string> AdapterInfo::GetIP(){
 //	if (!lpAdapter || (lpAdapter->hFile == INVALID_HANDLE_VALUE))
 //	{
 //		dwErrorCode = GetLastError();
-//		std::string strTemp = "Unable to open the adapter, Error Code : " + std::to_string(dwErrorCode);
-//		LOGMSG_ERROR(strTemp);
+//		LOGMSG_ERR_S() << "Unable to open the adapter, Error Code : " << std::to_string(dwErrorCode) << std::endl;
 //
 //		return std::string();
 //	}
 //
-//	// 
+//	//
 //	// Allocate a buffer to get the MAC adress
 //	//
 //
 //	OidData = (PPACKET_OID_DATA)malloc(6 + sizeof(PACKET_OID_DATA));
 //	if (OidData == NULL)
 //	{
-//		LOGMSG_ERROR("error allocating memory!\n");
+//		LOGMSG_ERR_S() << "error allocating memory!\n";
 //		PacketCloseAdapter(lpAdapter);
 //		return std::string();
 //	}
 //
-//	// 
+//	//
 //	// Retrieve the adapter MAC querying the NIC driver
 //	//
 //
@@ -143,7 +142,7 @@ std::vector<std::string> AdapterInfo::GetIP(){
 //	}
 //	else
 //	{
-//		LOGMSG_ERROR("error retrieving the MAC address of the adapter!\n");
+//		LOGMSG_ERR_S() << "error retrieving the MAC address of the adapter!\n";
 //	}
 //
 //	free(OidData);

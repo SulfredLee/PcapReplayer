@@ -4,16 +4,22 @@
 
 #include "mainwindow.h"
 #include "Config.h"
-#include "LogMgr.h"
+#include "Logger.h"
 #include "PlayerCtrl.h"
 
 int main(int argc, char* argv[]){
     QApplication app(argc, argv);
 
-    Logging::CLogTargetDebugger traceLogger(Logging::LOG_LEVEL_TRACE);
-    Logging::CLoggerFactory::getDefaultInstance()->AddTarget(&traceLogger);
+    Logger::LoggerConfig loggerConfig;
+    loggerConfig.logLevel = Logger::LogLevel::WARN;
+    loggerConfig.logPath = "./LogFiles";
+    loggerConfig.fileSize = 0;
+    loggerConfig.fileSizeLimit = 4 * 1024 * 1024; // 4 MByte
+    loggerConfig.isToConsole = false;
+    loggerConfig.isToFile = true;
+    LOGMSG_INIT(loggerConfig);
 
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S_C() << "IN" << std::endl;
 
     // Init all component
     Config config;
@@ -35,6 +41,6 @@ int main(int argc, char* argv[]){
 
     bool bRTN = app.exec();
 
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S_C() << "OUT" << std::endl;
     return bRTN;
 }

@@ -1,10 +1,10 @@
 debug/
 release/
+install/
 build/
 build_18.04/
 Log/
-cscope.files
-cscope.out
+cscope*
 GPATH
 GRTAGS
 GTAGS

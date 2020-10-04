@@ -1,19 +1,20 @@
 #include "Config.h"
-#include "LogMgr.h"
+#include "Logger.h"
 
 Config::Config()
     : m_DateTime(boost::gregorian::date(1997, 7, 1)
                  , boost::posix_time::time_duration(0, 0, 0)){
-    LOGMSG_INFO("IN");
+    LOGMSG_CLASS_NAME("Config");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     m_PlayerStatus = PlayerStatus::Stop;
     m_nAdapterIdx = 0;
     m_dSpeedFactor = 1;
     m_vecSchedulerDay.resize(7, false);
     m_strLatestFilePath = "";
     m_strDefaultConfigPath = "default_config.cfg";
-  m_strLatestConfigPath = "";
+    m_strLatestConfigPath = "";
     m_bSchedulerEnable = false;
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 Config::~Config(){
@@ -23,23 +24,23 @@ Config::~Config(){
 void Config::AddPcapFiles(const std::vector<std::string>& PcapFiles){
     std::lock_guard<std::mutex> lock(m_MuData);
     // boost::lock_guard<boost::mutex> lock(m_MuData);
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     m_PcapFiles.insert(m_PcapFiles.end(), PcapFiles.begin(), PcapFiles.end());
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void Config::RemovePcapFile(const int& nIndex){
     std::lock_guard<std::mutex> lock(m_MuData);
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     m_PcapFiles.erase(m_PcapFiles.begin() + nIndex);
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void Config::RemoveAllPcapFile(){
     std::lock_guard<std::mutex> lock(m_MuData);
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     m_PcapFiles.clear();
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 std::vector<std::string> Config::GetPcapFiles(){
@@ -49,27 +50,25 @@ std::vector<std::string> Config::GetPcapFiles(){
 
 void Config::SetLatestFilePath(const std::string& INStr){
     std::lock_guard<std::mutex> lock(m_MuData);
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     m_strLatestFilePath = INStr;
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void Config::SetPlayerStatus(const PlayerStatus& INStatus){
     std::lock_guard<std::mutex> lock(m_MuData);
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     m_PlayerStatus = INStatus;
 
-    std::stringstream ssLog;
-    ssLog << (int)m_PlayerStatus;
-    LOGMSG_INFO(ssLog.str());
+    LOGMSG_MSG_S() << (int)m_PlayerStatus << std::endl;
 
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 std::string Config::GetLatestFilePath(){
     std::lock_guard<std::mutex> lock(m_MuData);
-    LOGMSG_INFO("IN");
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "IN" << std::endl;
+    LOGMSG_MSG_S() << "OUT" << std::endl;
     return m_strLatestFilePath;
 }
 
@@ -106,9 +105,7 @@ void Config::SetAdapterIdx(const int& nSelect){
 void Config::SetSpeedFactor(const double& dSpeedFactor){
     std::lock_guard<std::mutex> lock(m_MuData);
     m_dSpeedFactor = dSpeedFactor;
-    std::stringstream ssTempLine;
-    ssTempLine << m_dSpeedFactor;
-    LOGMSG_INFO(ssTempLine.str());
+    LOGMSG_MSG_S() << m_dSpeedFactor;
 }
 
 double Config::GetSpeedFactor(){

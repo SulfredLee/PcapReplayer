@@ -2,13 +2,14 @@
 #include "ui_schedulerdialog.h"
 
 #include "Config.h"
-#include "LogMgr.h"
+#include "Logger.h"
 
 SchedulerDialog::SchedulerDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SchedulerDialog)
 {
     ui->setupUi(this);
+    LOGMSG_CLASS_NAME("SchedulerDialog");
     // handle checkbox
     connect(ui->checkBox_Enable, SIGNAL(stateChanged(int)), this, SLOT(onEnable(int)));
     // handle push button
@@ -91,7 +92,7 @@ void SchedulerDialog::SwitchUIStatus_Init(){
 }
 
 void SchedulerDialog::SwitchUIStatus_OneTimeOnly(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     // handle check box
     ui->checkBox_Monday->setEnabled(false);
     ui->checkBox_Tuesday->setEnabled(false);
@@ -104,11 +105,11 @@ void SchedulerDialog::SwitchUIStatus_OneTimeOnly(){
     ui->calendarWidget->setEnabled(true);
     // handle timeEdit
     ui->timeEdit->setEnabled(true);
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void SchedulerDialog::SwitchUIStatus_Weekly(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     // handle check box
     ui->checkBox_Monday->setEnabled(true);
     ui->checkBox_Tuesday->setEnabled(true);
@@ -121,7 +122,7 @@ void SchedulerDialog::SwitchUIStatus_Weekly(){
     ui->calendarWidget->setEnabled(false);
     // handle timeEdit
     ui->timeEdit->setEnabled(true);
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void SchedulerDialog::SwitchUIStatus_Enable(const bool& bIN){
@@ -155,7 +156,7 @@ void SchedulerDialog::onEnable(int nState){
 }
 
 void SchedulerDialog::onConfirm(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     // handle calender widget
     QDate SchedulerDate = ui->calendarWidget->selectedDate();
     // handle timeEdit
@@ -171,14 +172,12 @@ void SchedulerDialog::onConfirm(){
                          , time_duration(nHour, nMinute, nSecond));
         m_pConfig->SetDateTime(pt);
 
-        std::stringstream ssTempLine;
-        ssTempLine << nYear << "/"
-                   << nMonth << "/"
-                   << nDay << " "
-                   << nHour << ":"
-                   << nMinute << ":"
-                   << nSecond;
-        LOGMSG_INFO(ssTempLine.str());
+        LOGMSG_MSG_S() << nYear << "/"
+                       << nMonth << "/"
+                       << nDay << " "
+                       << nHour << ":"
+                       << nMinute << ":"
+                       << nSecond;
     }else{
         using namespace boost::posix_time;
         ptime now = second_clock::local_time();
@@ -193,14 +192,12 @@ void SchedulerDialog::onConfirm(){
                          , time_duration(nHour, nMinute, nSecond));
         m_pConfig->SetDateTime(pt);
 
-        std::stringstream ssTempLine;
-        ssTempLine << nYear << "/"
-                   << nMonth << "/"
-                   << nDay << " "
-                   << nHour << ":"
-                   << nMinute << ":"
-                   << nSecond;
-        LOGMSG_INFO(ssTempLine.str());
+        LOGMSG_MSG_S() << nYear << "/"
+                       << nMonth << "/"
+                       << nDay << " "
+                       << nHour << ":"
+                       << nMinute << ":"
+                       << nSecond;
     }
 
     // handle radio box
@@ -214,7 +211,7 @@ void SchedulerDialog::onConfirm(){
                                , ui->checkBox_Thursday->isChecked()
                                , ui->checkBox_Friday->isChecked()
                                , ui->checkBox_Saturday->isChecked());
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
     close();
 }
 

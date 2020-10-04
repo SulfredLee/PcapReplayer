@@ -18,7 +18,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Command to output information to the console
 # Useful for displaying errors, warnings, and debugging
-set(CMAKE_CXX_FLAGS "-Wall -fPIC -std=c++11 -g")
+set(CMAKE_CXX_FLAGS "-Wall -fPIC -std=c++2a -g")
 message(STATUS "Root - cxx Flags: " ${CMAKE_CXX_FLAGS})
 
 # Handle Preprocess Flags

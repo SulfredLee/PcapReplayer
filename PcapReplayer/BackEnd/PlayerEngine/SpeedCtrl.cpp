@@ -1,10 +1,11 @@
 #include "SpeedCtrl.h"
 #include "Config.h"
-#include "LogMgr.h"
+#include "Logger.h"
 
 SpeedCtrl::SpeedCtrl()
     : m_SpeedFactorTimer(100, boost::bind(&SpeedCtrl::SpeedFactorTimerCallback, this))
     , m_OneSecTimer(1000, boost::bind(&SpeedCtrl::OneSecTimerCallback, this)){
+    LOGMSG_CLASS_NAME("SpeedCtrl");
     m_dNextSendTime = 0;
     m_dPktArrivalTime = 0;
     m_unSentByte = 0;

@@ -1,15 +1,16 @@
 #include "PcapReader.h"
-#include "LogMgr.h"
+#include "Logger.h"
 #include "Common.h"
 #include "Config.h"
 
 #include <boost/filesystem.hpp>
 
 PcapReader::PcapReader(){
+    LOGMSG_CLASS_NAME("PcapReader");
 }
 
 PcapReader::~PcapReader(){
-    
+
 }
 
 void PcapReader::InitComponent(boost::function<void (pcap_pkthdr*, const unsigned char*, int)> f
@@ -23,13 +24,9 @@ void PcapReader::InitComponent(boost::function<void (pcap_pkthdr*, const unsigne
 void PcapReader::ReadFile(const std::string& strPcapFile){
     char errbuff[PCAP_ERRBUF_SIZE];
     pcap_t * pcap = pcap_open_offline(strPcapFile.c_str(), errbuff);
-    std::stringstream ssTempLine;
-    ssTempLine << "Reading: " << strPcapFile;
-    LOGMSG_INFO(ssTempLine.str());
+    LOGMSG_MSG_S() << "Reading: " << strPcapFile;
     if (pcap == NULL){
-        ssTempLine.str(std::string());
-        ssTempLine << "Error: " << errbuff;
-        LOGMSG_ERROR(ssTempLine.str());
+        LOGMSG_ERR_S() << "Error: " << errbuff;
         return;
     }
 
@@ -64,9 +61,9 @@ void PcapReader::ReadFile(const std::string& strPcapFile){
             ReCalculateCheckSum_IPHeader(pMyData);
             ReCalculateCheckSum_UDP_Pkt(pMyData, header->len);
         }
-		if (pMyData != nullptr){
-			delete pMyData;
-		}
+    if (pMyData != nullptr){
+      delete pMyData;
+    }
         // handle progressBar
         un64SentPacketSize += header->len + PCAPLOCALHEADERSIZE;
         float fProgress = (float)un64SentPacketSize / (float)un64CurFileSize;
@@ -79,9 +76,7 @@ void PcapReader::ReadFile(const std::string& strPcapFile){
 
         un64PacketCount++;
     }
-    ssTempLine.str(std::string());
-    ssTempLine << "Finished reading: " << strPcapFile;
-    LOGMSG_INFO(ssTempLine.str());
+    LOGMSG_MSG_S() << "Finished reading: " << strPcapFile;
 }
 
 void PcapReader::Reset(){
@@ -173,7 +168,7 @@ void PcapReader::ReCalculateCheckSum_UDP_Pkt(u_char* pData, unsigned int unDataL
     unChecksum += _byteswap_ushort(*pD16);
     //		handle dst Port
     pD16 = reinterpret_cast<const uint16_t*>(pData + 36);
-    unChecksum += _byteswap_ushort(*pD16);	
+    unChecksum += _byteswap_ushort(*pD16);
     //		handle data lenght, from IP layer to udp data layer
     pD16 = reinterpret_cast<const uint16_t*>(pData + 38);
     unChecksum += _byteswap_ushort(*pD16);

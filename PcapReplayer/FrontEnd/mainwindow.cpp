@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include "Config.h"
-#include "LogMgr.h"
+#include "Logger.h"
 
 #include <sstream>
 #include <stdio.h>
@@ -12,8 +12,9 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , m_Schedulerdialog(this){
     ui->setupUi(this);
+    LOGMSG_CLASS_NAME("MainWindow");
 
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
 
     // handle Menu action
     connect(ui->actionOpen_File_Menu, SIGNAL(triggered()), this, SLOT(onOpen_File()));
@@ -89,21 +90,21 @@ MainWindow::MainWindow(QWidget *parent)
     // init file drop
     setAcceptDrops(true);
 
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 MainWindow::~MainWindow(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     if (m_pDailyTimer != nullptr){
         delete m_pDailyTimer;
         m_pDailyTimer = nullptr;
     }
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
     delete ui;
 }
 
 void MainWindow::InitComponent(const MainWindowComponent& InCompo){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     m_Compo = InCompo;
 
     // handle config
@@ -123,11 +124,11 @@ void MainWindow::InitComponent(const MainWindowComponent& InCompo){
     AddIPMapToUI(ConvertStdMap2QMap(m_Compo.pConfig->GetMapSrcIP())
                  , ConvertStdMap2QMap(m_Compo.pConfig->GetMapDstIP()));
     AddSchedulToUI();
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::SwitchUIStatus_Init(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     // handle Menu Action
     ui->actionOpen_File_Menu->setEnabled(true);
     ui->actionOpen_Folder_Menu->setEnabled(true);
@@ -172,11 +173,11 @@ void MainWindow::SwitchUIStatus_Init(){
     ui->progressBar->setValue(0);
     // handle Label
     ui->LabelSchedulerStatus->setText("");
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::SwitchUIStatus_Play_Pause(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     // handle any status to Play or Pause
     // handle Menu Action
     ui->actionOpen_File_Menu->setEnabled(false);
@@ -230,21 +231,21 @@ void MainWindow::SwitchUIStatus_Play_Pause(){
         ui->BtnPlay->setEnabled(true);
         ui->BtnPause->setEnabled(false);
     }
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::SwitchUIStatus_Stop(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     SwitchUIStatus_Init();
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::AddPcapFilesToUI(const QStringList& INFiles){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     // handle UI
     // ui->listWidget_FileList->clear();
     if (INFiles.isEmpty()){
-        LOGMSG_INFO("OUT");
+        LOGMSG_MSG_S() << "OUT" << std::endl;
         return;
     }
 
@@ -262,7 +263,7 @@ void MainWindow::AddPcapFilesToUI(const QStringList& INFiles){
         }
     }
     ui->listWidget_FileList->setCurrentRow(0);
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::AddIPMapToUI(const QMap<QString, QString>& SrcMap
@@ -284,7 +285,7 @@ void MainWindow::AddIPMapToUI(const QMap<QString, QString>& SrcMap
 }
 
 void MainWindow::AddSchedulToUI(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     if (m_Compo.pConfig->GetSchedulerEnable()) {
         QString qstrSchedulerStatus = "";
         if (m_Compo.pConfig->GetOneTimeOnly()) {
@@ -364,7 +365,7 @@ void MainWindow::AddSchedulToUI(){
         ui->LabelSchedulerStatus->setText("Scheduler Disabled");
         ui->LabelSchedulerStatus->setStyleSheet("QLabel {background-color : red; color : blue;}");
     }
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::GetBitPerSec(double bit, QString& line, int step){
@@ -421,29 +422,29 @@ QString MainWindow::ConvertString2QString(const std::string& str){
 }
 
 std::vector<std::string> MainWindow::ConvertQStringList(const QStringList& qstrList){
-    LOGMSG_DEBUG("IN");
+    LOGMSG_DBG_S() << "IN" << std::endl;
     std::vector<std::string> result;
     for (qint32 i = 0; i < qstrList.length(); i++){
         result.push_back(ConvertQString2String(qstrList[i]));
     }
-    LOGMSG_DEBUG("OUT");
+    LOGMSG_DBG_S() << "OUT" << std::endl;
     return result;
 }
 
 QStringList MainWindow::ConvertVectorString(const std::vector<std::string>& vecStr){
-    LOGMSG_DEBUG("IN");
+    LOGMSG_DBG_S() << "IN" << std::endl;
     QStringList result;
     for (size_t i = 0; i < vecStr.size(); i++){
         result += ConvertString2QString(vecStr[i]);
     }
-    LOGMSG_DEBUG("OUT");
+    LOGMSG_DBG_S() << "OUT" << std::endl;
     return result;
 }
 
 bool MainWindow::IsFileExists(const QString& qstrPath){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     QFileInfo check_file(qstrPath);
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
     return (check_file.exists() && check_file.isFile());
 }
 
@@ -466,7 +467,7 @@ QString MainWindow::ConvertTime2QString(double dTime){
 }
 
 void MainWindow::DailyTimerCallback(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     if (m_Compo.pConfig->GetOneTimeOnly()) {
         emit onPlay_FromMainWindow();
     }else{
@@ -477,41 +478,39 @@ void MainWindow::DailyTimerCallback(){
             emit onPlay_FromMainWindow();
         }
 
-        std::stringstream ssTempLine;
-        ssTempLine << now.date().day_of_week()
-                   << " " << now.date().day_of_week().as_number(); // Sunday: 0, Monday: 1, ... , Saturday: 6
-        LOGMSG_INFO(ssTempLine.str());
+        LOGMSG_MSG_S() << now.date().day_of_week()
+                       << " " << now.date().day_of_week().as_number(); // Sunday: 0, Monday: 1, ... , Saturday: 6
     }
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 // override
 void MainWindow::dragEnterEvent(QDragEnterEvent* event){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     // if some actions should not be usable, like move, this code must be adopted
     event->acceptProposedAction();
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 // override
 void MainWindow::dragMoveEvent(QDragMoveEvent* event){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     // if some actions should not be usable, like move, this code must be adopted
     event->acceptProposedAction();
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 // override
 void MainWindow::dragLeaveEvent(QDragLeaveEvent* event){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     // if some actions should not be usable, like move, this code must be adopted
     event->accept();
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 // override
 void MainWindow::dropEvent(QDropEvent* event){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     const QMimeData* mimeData = event->mimeData();
 
     if (mimeData->hasUrls()){
@@ -525,7 +524,7 @@ void MainWindow::dropEvent(QDropEvent* event){
         }
         AddPcapFilesToUI(pathList);
     }
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 std::map<std::string, std::string> MainWindow::ConvertQMap2StdMap(const QMap<QString, QString>& inMap){
@@ -550,7 +549,7 @@ QMap<QString, QString> MainWindow::ConvertStdMap2QMap(const std::map<std::string
 }
 
 void MainWindow::onOpen_File(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     QStringList fileNames; // fileNames contains full path with file name
     if (m_Compo.pConfig->GetLatestFilePath() == "")
         fileNames = QFileDialog::getOpenFileNames(this,
@@ -564,16 +563,16 @@ void MainWindow::onOpen_File(){
                                                   tr("Pcap Files (*.pcap)"));
 
     if (fileNames.length() == 0){
-        LOGMSG_INFO("OUT");
+        LOGMSG_MSG_S() << "OUT" << std::endl;
         return;
     }
     AddPcapFilesToUI(fileNames);
 
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onOpen_Folder(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     QString strFilePath;
     if (m_Compo.pConfig->GetLatestFilePath() == "")
         strFilePath = QFileDialog::getExistingDirectory(this,
@@ -587,7 +586,7 @@ void MainWindow::onOpen_Folder(){
                                                         QFileDialog::ShowDirsOnly);
 
     if (strFilePath == ""){
-        LOGMSG_INFO("OUT");
+        LOGMSG_MSG_S() << "OUT" << std::endl;
         return;
     }
 
@@ -602,11 +601,11 @@ void MainWindow::onOpen_Folder(){
     }
 
     AddPcapFilesToUI(fileNames);
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onSave_Config(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     QString qstrConfigFileName;
     if (m_Compo.pConfig->GetConfigPath() == ""){
         qstrConfigFileName = QFileDialog::getSaveFileName(this
@@ -631,11 +630,11 @@ void MainWindow::onSave_Config(){
     //    TestingBox.setWindowTitle(QString("Wait for input!"));
     //    TestingBox.show();
     //    TestingBox.exec();
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onLoad_Config(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     QString qstrConfigFileName;
     if (m_Compo.pConfig->GetConfigPath() == "") {
         qstrConfigFileName = QFileDialog::getOpenFileName(this
@@ -660,11 +659,11 @@ void MainWindow::onLoad_Config(){
     //    TestingBox.setWindowTitle(QString("Wait for input!"));
     //    TestingBox.show();
     //    TestingBox.exec();
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onScheduler(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     m_Schedulerdialog.setModal(true);
     m_Schedulerdialog.InitComponent(m_Compo.pConfig);
     m_Schedulerdialog.show();
@@ -677,14 +676,14 @@ void MainWindow::onScheduler(){
 
     AddSchedulToUI();
 
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onPlay(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
 
     if (m_Compo.pConfig->GetPlayerStatus() == PlayerStatus::Play){
-        LOGMSG_INFO("OUT");
+        LOGMSG_MSG_S() << "OUT" << std::endl;
         return;
     }
 
@@ -703,14 +702,14 @@ void MainWindow::onPlay(){
     *p = PlayerMsg::Play;
     m_Compo.pMsgQ->push(p);
 
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onPause(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
 
     if (m_Compo.pConfig->GetPlayerStatus() == PlayerStatus::Pause){
-        LOGMSG_INFO("OUT");
+        LOGMSG_MSG_S() << "OUT" << std::endl;
         return;
     }
 
@@ -720,14 +719,14 @@ void MainWindow::onPause(){
     *p = PlayerMsg::Pause;
     m_Compo.pMsgQ->push(p);
 
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onStop(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
 
     if (m_Compo.pConfig->GetPlayerStatus() == PlayerStatus::Stop){
-        LOGMSG_INFO("OUT");
+        LOGMSG_MSG_S() << "OUT" << std::endl;
         return;
     }
 
@@ -738,11 +737,11 @@ void MainWindow::onStop(){
     *p = PlayerMsg::Stop;
     m_Compo.pMsgQ->push(p);
 
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onRemove(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     int nCurIdx = ui->listWidget_FileList->currentRow();
     QListWidgetItem* pItem = ui->listWidget_FileList->takeItem(nCurIdx);
     delete pItem;
@@ -752,40 +751,40 @@ void MainWindow::onRemove(){
         ui->BtnRemoveAll->setEnabled(false);
     }
     m_Compo.pConfig->RemovePcapFile(nCurIdx);
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onRemoveAll(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     ui->listWidget_FileList->clear();
     // handle UI
     ui->BtnRemove->setEnabled(false);
     ui->BtnRemoveAll->setEnabled(false);
 
     m_Compo.pConfig->RemoveAllPcapFile();
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onRegularPaly(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     SwitchUIStatus_Play_Pause();
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onAddSrcMap(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     ui->tableWidget_NetMapSrc->insertRow(ui->tableWidget_NetMapSrc->rowCount());
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onAddDstMap(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     ui->tableWidget_NetMapDst->insertRow(ui->tableWidget_NetMapDst->rowCount());
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onRemoveScrMapIP(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     int nCurRow = ui->tableWidget_NetMapSrc->currentRow();
     if (nCurRow == -1) {
         return;
@@ -796,18 +795,18 @@ void MainWindow::onRemoveScrMapIP(){
     //  TestingBox.setWindowTitle(QString("Wait for input!"));
     //  TestingBox.show();
     //  TestingBox.exec();
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onRemoveDstMapIP(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     int nCurRow = ui->tableWidget_NetMapDst->currentRow();
     if (nCurRow == -1) {
         return;
     }
     ui->tableWidget_NetMapDst->removeRow(nCurRow);
 
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onSelectInterface(int nSelect){
@@ -820,7 +819,7 @@ void MainWindow::onProgressBar(int nValue){
 
 void MainWindow::onStatusBar_SentByte(int nSentByte){
     GetBitPerSec(nSentByte * 8, m_qstrSentByte, 0);
-    // LOGMSG_INFO(ConvertQString2String(m_qstrSentByte));
+    // LOGMSG_MSG_S() << ConvertQString2String(m_qstrSentByte));
 }
 
 void MainWindow::onStatusBar_CurPktTime(double dCurPktTime){
@@ -850,9 +849,9 @@ void MainWindow::onStatusBar_Invalidate(){
 }
 
 void MainWindow::onSerialization(bool bSave){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     if (bSave) {
-        LOGMSG_INFO(m_Compo.pConfig->GetConfigPath());
+        LOGMSG_MSG_S() << m_Compo.pConfig->GetConfigPath() << std::endl;
         QFile file(ConvertString2QString(m_Compo.pConfig->GetConfigPath()));
         if (file.open(QIODevice::WriteOnly))
         {
@@ -876,7 +875,7 @@ void MainWindow::onSerialization(bool bSave){
             file.close();
         }
     }else{
-        LOGMSG_INFO(m_Compo.pConfig->GetConfigPath());
+        LOGMSG_MSG_S() << m_Compo.pConfig->GetConfigPath() << std::endl;
         QFile file(ConvertString2QString(m_Compo.pConfig->GetConfigPath()));
         if (file.open(QIODevice::ReadOnly))
         {
@@ -919,16 +918,16 @@ void MainWindow::onSerialization(bool bSave){
             file.close();
         }
     }
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 void MainWindow::onListWidgetNextFile(){
-    LOGMSG_INFO("IN");
+    LOGMSG_MSG_S() << "IN" << std::endl;
     int nCurRow = ui->listWidget_FileList->currentRow();
     int nTotalFiles = ui->listWidget_FileList->count();
     nCurRow = ++nCurRow % nTotalFiles;
     ui->listWidget_FileList->setCurrentRow(nCurRow);
-    LOGMSG_INFO("OUT");
+    LOGMSG_MSG_S() << "OUT" << std::endl;
 }
 
 template<class T>

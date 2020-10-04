@@ -1,11 +1,12 @@
 #include "PcapSender.h"
 #include "Config.h"
-#include "LogMgr.h"
+#include "Logger.h"
 
 #include <string>
 #include <sstream>
 
 PcapSender::PcapSender(){
+    LOGMSG_CLASS_NAME("PcapSender");
     m_pAdapter = nullptr;
 }
 
@@ -26,15 +27,13 @@ void PcapSender::InitComponent(boost::function<void (pcap_pkthdr*, const unsigne
 
 void PcapSender::SendPacket(pcap_pkthdr* pHeader, const unsigned char* pData){
     if (m_pAdapter == nullptr){
-        LOGMSG_ERROR("Error Adapter is empty");
+        LOGMSG_ERR_S() << "Error Adapter is empty" << std::endl;
         return;
     }
     if (pcap_sendpacket(m_pAdapter,
                         pData,
                         pHeader->len) != 0){
-        std::ostringstream ssTempLine;
-        ssTempLine << "Error sending the packet: " << pcap_geterr(m_pAdapter);
-        LOGMSG_ERROR(ssTempLine.str());
+        LOGMSG_ERR_S() << "Error sending the packet: " << pcap_geterr(m_pAdapter) << std::endl;
     }
     m_fOutputCallback(pHeader, pData);
 }
@@ -53,12 +52,7 @@ void PcapSender::SetAdapter(){
                                      1000,			// read timeout
                                      errbuff			// error buffer
                                      )) == NULL){
-        std::ostringstream ssTempLine;
-        ssTempLine << "Unable to open the adapter. " << strAdapterName << " is not supported by WinPcap";
-        LOGMSG_ERROR(ssTempLine.str());
-
-        ssTempLine.str(std::string());
-        ssTempLine << errbuff;
-        LOGMSG_ERROR(ssTempLine.str());
+        LOGMSG_ERR_S() << "Unable to open the adapter. " << strAdapterName << " is not supported by WinPcap" << std::endl;
+        LOGMSG_ERR_S() << errbuff << std::endl;
     }
 }
