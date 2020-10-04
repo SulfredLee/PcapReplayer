@@ -13,7 +13,7 @@ PcapReader::~PcapReader(){
 
 }
 
-void PcapReader::InitComponent(boost::function<void (pcap_pkthdr*, const unsigned char*, int)> f
+void PcapReader::InitComponent(std::function<void (pcap_pkthdr*, const unsigned char*, int)> f
                                , Config* pConfig){
     m_fOutputCallback = f;
     m_pConfig = pConfig;

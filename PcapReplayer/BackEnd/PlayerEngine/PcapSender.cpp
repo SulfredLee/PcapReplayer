@@ -17,7 +17,7 @@ PcapSender::~PcapSender(){
 	}
 }
 
-void PcapSender::InitComponent(boost::function<void (pcap_pkthdr*, const unsigned char*)> f,
+void PcapSender::InitComponent(std::function<void (pcap_pkthdr*, const unsigned char*)> f,
                                Config* pConfig){
     m_fOutputCallback = f;
     m_pConfig = pConfig;

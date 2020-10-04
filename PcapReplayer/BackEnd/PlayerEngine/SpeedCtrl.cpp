@@ -3,8 +3,8 @@
 #include "Logger.h"
 
 SpeedCtrl::SpeedCtrl()
-    : m_SpeedFactorTimer(100, boost::bind(&SpeedCtrl::SpeedFactorTimerCallback, this))
-    , m_OneSecTimer(1000, boost::bind(&SpeedCtrl::OneSecTimerCallback, this)){
+    : m_SpeedFactorTimer(100, std::bind(&SpeedCtrl::SpeedFactorTimerCallback, this))
+    , m_OneSecTimer(1000, std::bind(&SpeedCtrl::OneSecTimerCallback, this)){
     LOGMSG_CLASS_NAME("SpeedCtrl");
     m_dNextSendTime = 0;
     m_dPktArrivalTime = 0;
@@ -15,8 +15,8 @@ SpeedCtrl::SpeedCtrl()
 SpeedCtrl::~SpeedCtrl(){
 }
 
-void SpeedCtrl::InitComponent(boost::function<void (pcap_pkthdr*, const unsigned char*)> fn_1,
-                              boost::function<void (unsigned int, double, double)> fn_2,
+void SpeedCtrl::InitComponent(std::function<void (pcap_pkthdr*, const unsigned char*)> fn_1,
+                              std::function<void (unsigned int, double, double)> fn_2,
                               Config* pConfig){
     m_pConfig = pConfig;
     m_fn_1 = fn_1;
@@ -35,11 +35,11 @@ void SpeedCtrl::SendPacket(pcap_pkthdr* pHeader, const unsigned char* pData){
         }
         while (dArrivalTime > m_dNextSendTime){//Speed factor block
             m_dSendTimeDiff = dArrivalTime - m_dNextSendTime;
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }else{// Speed factor disable
         while (m_dSpeedLimit > 0 && m_unSentByte * 8 > m_dSpeedLimit){//Fix Speed block
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
 

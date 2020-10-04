@@ -8,7 +8,8 @@ PlayerCtrl::PlayerCtrl()
     LOGMSG_CLASS_NAME("PlayerCtrl");
     LOGMSG_MSG_S() << "IN" << std::endl;
 
-    m_bPause = false;
+    m_bPause.store(false);
+    m_bStop.store(false);
     m_nPreProgress = -1;
     m_nLoopCount = -1;
 
@@ -17,11 +18,12 @@ PlayerCtrl::PlayerCtrl()
 
 PlayerCtrl::~PlayerCtrl(){
     LOGMSG_MSG_S() << "IN" << std::endl;
-    m_ReplayThread.interrupt();
+    m_bStop.store(true);
+    // m_ReplayThread.interrupt();
     m_ReplayThread.join();
 
-    m_MsgQThread.interrupt();
-    auto p = boost::make_shared<PlayerMsg>();
+    // m_MsgQThread.interrupt();
+    auto p = std::make_shared<PlayerMsg>();
     *p = PlayerMsg::Stop;
     m_MsgQ.push(p);
     m_MsgQThread.join();
@@ -35,15 +37,15 @@ void PlayerCtrl::InitComponent(const PlayerCtrlComponent& InCompo){
     LOGMSG_MSG_S() << "IN" << std::endl;
     m_Compo = InCompo;
     // handle Replay pipe line
-    m_PcapReader.InitComponent(boost::bind(&PlayerCtrl::Process_PcapReader, this, _1, _2, _3)
+    m_PcapReader.InitComponent(std::bind(&PlayerCtrl::Process_PcapReader, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
                                , m_Compo.pConfig);
-    m_SpeedCtrl.InitComponent(boost::bind(&PlayerCtrl::Process_SpeedCtrl_1, this, _1, _2),
-                              boost::bind(&PlayerCtrl::Process_SpeedCtrl_2, this, _1, _2, _3),
+    m_SpeedCtrl.InitComponent(std::bind(&PlayerCtrl::Process_SpeedCtrl_1, this, std::placeholders::_1, std::placeholders::_2),
+                              std::bind(&PlayerCtrl::Process_SpeedCtrl_2, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
                               m_Compo.pConfig);
-    m_PcapSender.InitComponent(boost::bind(&PlayerCtrl::Process_PcapSender, this, _1, _2),
+    m_PcapSender.InitComponent(std::bind(&PlayerCtrl::Process_PcapSender, this, std::placeholders::_1, std::placeholders::_2),
                                m_Compo.pConfig);
 
-    auto p = boost::make_shared<PlayerMsg>();
+    auto p = std::make_shared<PlayerMsg>();
     *p = PlayerMsg::Stop;
     m_MsgQ.push(p);
 
@@ -67,7 +69,10 @@ void PlayerCtrl::ProcessStop(){
     m_Compo.pConfig->SetPlayerStatus(PlayerStatus::Stop);
 
     // we stop the current replay
-    m_ReplayThread.interrupt();
+    m_bPause.store(false);
+    m_bStop.store(true);
+    // m_ReplayThread.interrupt();
+    m_ReplayThread.join();
 
     m_SpeedCtrl.Reset();
 
@@ -85,7 +90,8 @@ void PlayerCtrl::ProcessPause(){
     m_Compo.pConfig->SetPlayerStatus(PlayerStatus::Pause);
 
     // we pause the current replay
-    m_bPause = true;
+    m_bPause.store(true);
+    m_bStop.store(false);
 
     LOGMSG_MSG_S() << "OUT" << std::endl;
 }
@@ -98,7 +104,7 @@ void PlayerCtrl::ProcessPlay(){
         return;
     }else if (m_Compo.pConfig->GetPlayerStatus() == PlayerStatus::Pause){
         m_Compo.pConfig->SetPlayerStatus(PlayerStatus::Play);
-        m_bPause = false;
+        m_bPause.store(false);
 
         m_PcapReader.Reset();
         m_SpeedCtrl.Reset();
@@ -109,25 +115,26 @@ void PlayerCtrl::ProcessPlay(){
         return;
     }else{
         m_Compo.pConfig->SetPlayerStatus(PlayerStatus::Play);
-        m_bPause = false;
+        m_bPause.store(false);
 
         m_PcapReader.Reset();
         m_SpeedCtrl.Reset();
         m_PcapSender.SetAdapter();
         m_nLoopCount = m_Compo.pConfig->GetLoopCount();
 
-        m_ReplayThread = boost::thread(&PlayerCtrl::ReplayMain, this);
+        m_ReplayThread = std::thread(&PlayerCtrl::ReplayMain, this);
         LOGMSG_MSG_S() << "OUT" << std::endl;
         return;
     }
 }
 
 void PlayerCtrl::Process_PcapReader(pcap_pkthdr* pHeader, const unsigned char* pData, int nProgress){
-    while (m_bPause){
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-        boost::this_thread::interruption_point(); // this thread is m_ReplayThread
+    while (m_bPause.load()){
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        // std::this_thread::interruption_point(); // this thread is m_ReplayThread
     }
-    boost::this_thread::interruption_point(); // this thread is m_ReplayThread
+    if (m_bStop.load()) return;
+    // std::this_thread::interruption_point(); // this thread is m_ReplayThread
     if (m_nPreProgress != nProgress){
         m_nPreProgress = nProgress;
         emit m_Compo.pMainWindow->onProgressBar_FromPlayerCtrl(nProgress);
@@ -154,8 +161,9 @@ void PlayerCtrl::Process_PcapSender(pcap_pkthdr* pHeader, const unsigned char* p
 void PlayerCtrl::MsgQMain(){
     LOGMSG_MSG_S() << "IN" << std::endl;
     while (true){
-        boost::this_thread::interruption_point(); // this thread is m_MsgQThread
-        auto pMsg = boost::make_shared<PlayerMsg>();
+        // std::this_thread::interruption_point(); // this thread is m_MsgQThread
+        if (m_bStop.load()) break;
+        auto pMsg = std::make_shared<PlayerMsg>();
         while (m_MsgQ.get(pMsg)){
             switch(*pMsg){
             case PlayerMsg::Stop:

@@ -290,7 +290,7 @@ void MainWindow::AddSchedulToUI(){
         QString qstrSchedulerStatus = "";
         if (m_Compo.pConfig->GetOneTimeOnly()) {
             m_pDailyTimer = new DailyTimer(m_Compo.pConfig->GetDateTime()
-                                           , boost::bind(&MainWindow::DailyTimerCallback, this));
+                                           , std::bind(&MainWindow::DailyTimerCallback, this));
             // handle UI Label information
             boost::posix_time::ptime tempTime = m_Compo.pConfig->GetDateTime();
             qstrSchedulerStatus = "Scheduler On : ";
@@ -310,7 +310,7 @@ void MainWindow::AddSchedulToUI(){
                 newTime = advanceTime;
             }
             m_pDailyTimer = new DailyTimer(newTime
-                                           , boost::bind(&MainWindow::DailyTimerCallback, this));
+                                           , std::bind(&MainWindow::DailyTimerCallback, this));
             // handle UI Label information
             qstrSchedulerStatus = "Weekly Scheduler On : ";
             std::vector<bool> vecTemp = m_Compo.pConfig->GetSchedulerDay();
@@ -698,7 +698,7 @@ void MainWindow::onPlay(){
     m_Compo.pConfig->SetMapSrcIP(ConvertQMap2StdMap(GetMapFromNetworkTable(ui->tableWidget_NetMapSrc)));
 
     // handle Ctrl
-    auto p = boost::make_shared<PlayerMsg>();
+    auto p = std::make_shared<PlayerMsg>();
     *p = PlayerMsg::Play;
     m_Compo.pMsgQ->push(p);
 
@@ -715,7 +715,7 @@ void MainWindow::onPause(){
 
     SwitchUIStatus_Play_Pause();
 
-    auto p = boost::make_shared<PlayerMsg>();
+    auto p = std::make_shared<PlayerMsg>();
     *p = PlayerMsg::Pause;
     m_Compo.pMsgQ->push(p);
 
@@ -733,7 +733,7 @@ void MainWindow::onStop(){
     SwitchUIStatus_Stop();
     AddSchedulToUI();
 
-    auto p = boost::make_shared<PlayerMsg>();
+    auto p = std::make_shared<PlayerMsg>();
     *p = PlayerMsg::Stop;
     m_Compo.pMsgQ->push(p);
 

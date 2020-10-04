@@ -5,8 +5,7 @@
 #include <sstream>
 #include <map>
 #include <vector>
-
-#include <boost/function.hpp>
+#include <functional>
 
 #include "pcap.h"
 
@@ -17,12 +16,12 @@ public:
     PcapReader();
     ~PcapReader();
 
-    void InitComponent(boost::function<void (pcap_pkthdr*, const unsigned char*, int)> f
+    void InitComponent(std::function<void (pcap_pkthdr*, const unsigned char*, int)> f
                        , Config* pConfig);
     void ReadFile(const std::string& strPcapFile);
     void Reset();
 private:
-    boost::function<void (pcap_pkthdr*, const unsigned char*, int)> m_fOutputCallback;
+    std::function<void (pcap_pkthdr*, const unsigned char*, int)> m_fOutputCallback;
     std::string getDstIPFromPcapPkt(const u_char *& data);
     std::string getSrcIPFromPcapPkt(const u_char *& data);
     void UpdateDstIP(u_char *& data, std::string strDstIP);

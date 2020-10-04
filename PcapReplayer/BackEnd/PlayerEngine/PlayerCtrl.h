@@ -1,14 +1,13 @@
 #ifndef PLAYERCTRL_H
 #define PLAYERCTRL_H
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread.hpp>
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <boost/chrono.hpp>
-#include <boost/atomic.hpp>
 #include <boost/timer.hpp>
+
+#include <chrono>
+#include <atomic>
+#include <functional>
+#include <thread>
+#include <memory>
 
 #include "Common.h"
 #include "MsgQ.h"
@@ -52,9 +51,10 @@ private:
     PcapReader m_PcapReader;
     SpeedCtrl m_SpeedCtrl;
     PcapSender m_PcapSender;
-    boost::thread m_ReplayThread;
-    boost::thread m_MsgQThread;
-    boost::atomic<bool> m_bPause;
+    std::thread m_ReplayThread;
+    std::thread m_MsgQThread;
+    std::atomic<bool> m_bPause;
+    std::atomic<bool> m_bStop;
     int m_nPreProgress; // previous progressBar status
     int m_nLoopCount;
 };
